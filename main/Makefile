@@ -3,7 +3,7 @@
 			temperature.c \
 			main.c 
 	
-	common_includes = 
+	common_includes = common.h
 
 	common_flags =	-lrt \
 			-pthread
