@@ -1,7 +1,7 @@
-	common_sources= light.c \
+	common_sources= light_dummy.c \
+			temperature_dummy.c \
 			logger.c \
-			temperature.c \
-			main.c 
+			project.c 
 	
 	common_includes = common.h
 
@@ -11,9 +11,9 @@
 
 	CC=gcc
 	flags =	$(common_flags)
-	sources =	$(common_sources)
-	includes =	$(common_includes)
-	executables:= 	$(sources:.elf=.elf)
+	sources = $(common_sources)
+	includes = $(common_includes)
+	executables:= $(sources:.elf=.elf)
 	objects:= $(sources:.c=.o)
 	deps:= $(sources:.c=.d)	
 
@@ -33,10 +33,10 @@
 	clean \
 	build 
 
-build:	$(executables)	
+build:	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf
 
-%.elf:	$(objects)	$(deps)	
-	$(CC)	-o	$@	$(objects)	$(flags)	
+%.elf:%.o
+	$(CC)	-o	$@	$<	$(flags)
 
 %.i:%.c		$(includes)
 	$(CC)	-E	$<	-o	$@	$(flags)	
