@@ -16,12 +16,11 @@ static void get_temperature (void)
 	{
 		wait(NULL);
 	}
-	//sem_wait(sem_temp);
+	sem_wait(sem_temp);
 	shm_ptr=shmat(shm_temp,(void*)0,0);
 	memcpy(&temp_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
-	//sem_post(sem_temp);
-    	sem_unlink(shm_temp_id);
+	sem_post(sem_temp);
 	printf("temperature = %d\n",temp_data.data[celcius_id]);
 }
 
@@ -37,12 +36,11 @@ static void get_luminosity(void)
 	{
 		wait(NULL);
 	}
-	//sem_wait(sem_light);
+	sem_wait(sem_light);
 	shm_ptr=shmat(shm_light,(void*)0,0);
 	memcpy(&light_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
-	//sem_post(sem_light);
-    	sem_unlink(shm_light_id);
+	sem_post(sem_light);
 	printf("luminosity = %d\n",light_data.data[luminosity_id]);
 }
 
@@ -53,5 +51,15 @@ void main(void)
 	shm_temp=shmget(key_temp,LOG_SIZE,0666|IPC_CREAT);
 	shm_light=shmget(key_light,LOG_SIZE,0666|IPC_CREAT);
 	get_temperature();
-	get_luminosity();
+	get_luminosity();	
+	if(!fork())
+	{
+		execvp(logger_exec[0],logger_exec);
+	}
+	else
+	{
+		wait(NULL);
+	}
+	sem_unlink(shm_temp_id);	
+    	sem_unlink(shm_light_id);
 }

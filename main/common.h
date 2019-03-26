@@ -35,6 +35,7 @@ typedef struct
 
 #define LOG_SIZE sizeof(log_t)
 
+static uint8_t logfile[]="log.txt";
 static uint8_t shm_temp_id[]="temperature_dummy.c";
 static uint8_t shm_light_id[]="light_dummy.c";
 static uint8_t *temp_exec[]={"./temperature_dummy.elf",NULL};;

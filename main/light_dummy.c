@@ -25,10 +25,10 @@ void main(void)
 	key_light = ftok(shm_light_id,project_id);
 	shm_light=shmget(key_light,LOG_SIZE,0666|IPC_CREAT);
 	//shared memory send
-	//sem_wait(sem_light);
+	sem_wait(sem_light);
 	shm_ptr=shmat(shm_light,(void*)0,0);	
 	memcpy(shm_ptr,&log_data,LOG_SIZE);
 	shmdt(shm_ptr);
-	//sem_post(sem_light);
+	sem_post(sem_light);
 }
 

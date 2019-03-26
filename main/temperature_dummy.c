@@ -28,10 +28,10 @@ void main(void)
 	key_temp = ftok(shm_temp_id,project_id);
 	shm_temp=shmget(key_temp,LOG_SIZE,0666|IPC_CREAT);
 	//shared memory send
-	//sem_wait(sem_temp);
+	sem_wait(sem_temp);
 	shm_ptr=shmat(shm_temp,(void*)0,0);
 	memcpy(shm_ptr,&log_data,LOG_SIZE);
 	shmdt(shm_ptr);
-	//sem_post(sem_temp);
+	sem_post(sem_temp);
 }
 

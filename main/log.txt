@@ -1,0 +1,672 @@
+
+Time & Date : Tue Mar 26 16:39:07 2019
+(551103178 ns), log ID: 423143686
+ Temperature: -81°C, 192°K, -113°F
+
+Time & Date : Tue Mar 26 16:39:07 2019
+(553103145 ns), log ID: 423143686
+ Luminosity: 83%
+
+Time & Date : Tue Mar 26 16:40:22 2019
+584772029 ns, log ID: 387005132
+Temperature: -67°C, 206°K, -88°F
+
+Time & Date : Tue Mar 26 16:40:22 2019
+587037055 ns, log ID: 387005132
+Luminosity: 73%
+
+Time & Date : Tue Mar 26 16:40:29 2019
+929907840 ns, log ID: 139306873
+Temperature: -25°C, 248°K, -13°F
+
+Time & Date : Tue Mar 26 16:40:29 2019
+932102163 ns, log ID: 139306873
+Luminosity: 39%
+
+Time & Date : Tue Mar 26 16:41:01 2019
+73456985 ns, log ID: 618088262
+Temperature: -9°C, 264°K, 15°F
+
+Time & Date : Tue Mar 26 16:41:01 2019
+75720827 ns, log ID: 618088262
+Luminosity: 67%
+
+Time & Date : Tue Mar 26 16:41:04 2019
+774636004 ns, log ID: 1140699264
+Temperature: -8°C, 265°K, 17°F
+
+Time & Date : Tue Mar 26 16:41:04 2019
+776718459 ns, log ID: 1140699264
+Luminosity: 52%
+
+Time & Date : Tue Mar 26 16:41:07 2019
+108058810 ns, log ID: 573064176
+Temperature: -6°C, 267°K, 21°F
+
+Time & Date : Tue Mar 26 16:41:07 2019
+110841973 ns, log ID: 573064176
+Luminosity: 14%
+
+Time & Date : Tue Mar 26 16:41:45 2019
+
+(613668703 ns), log ID: 2058711997
+ Temperature: 25°C, 298°K, 77°F
+
+Time & Date : Tue Mar 26 16:41:45 2019
+
+(616135504 ns), log ID: 2058711997
+ Luminosity: 89%
+
+Time & Date : Tue Mar 26 16:41:56 2019
+
+(102046059 ns), log ID: 10015225
+ Temperature: -70°C, 203°K, -94°F
+
+Time & Date : Tue Mar 26 16:41:56 2019
+
+(104412657 ns), log ID: 10015225
+ Luminosity: 70%
+
+Time & Date : Tue Mar 26 16:41:57 2019
+
+(572594278 ns), log ID: 1980556053
+ Temperature: -20°C, 253°K, -4°F
+
+Time & Date : Tue Mar 26 16:41:57 2019
+
+(574920011 ns), log ID: 1980556053
+ Luminosity: 72%
+
+Time & Date : Tue Mar 26 16:43:05 2019
+228660706 ns, log ID: 1093344643
+Temperature: -89°C, 184°K, -128°F
+
+Time & Date : Tue Mar 26 16:43:05 2019
+230652602 ns, log ID: 1093344643
+Luminosity: 59%
+
+Time & Date : Tue Mar 26 16:43:07 2019
+793842427 ns, log ID: 1793495223
+Temperature: -85°C, 188°K, -121°F
+
+Time & Date : Tue Mar 26 16:43:07 2019
+796430179 ns, log ID: 1793495223
+Luminosity: 47%
+
+Time & Date : Tue Mar 26 16:43:08 2019
+882555863 ns, log ID: 1598847044
+Temperature: -57°C, 216°K, -70°F
+
+Time & Date : Tue Mar 26 16:43:08 2019
+885260245 ns, log ID: 1598847044
+Luminosity: 63%
+
+Time & Date : Tue Mar 26 16:43:10 2019
+377713384 ns, log ID: 162726541
+Temperature: -67°C, 206°K, -88°F
+
+Time & Date : Tue Mar 26 16:43:10 2019
+379995754 ns, log ID: 162726541
+Luminosity: 29%
+
+Time & Date : Tue Mar 26 16:43:11 2019
+800944945 ns, log ID: 2124807418
+Temperature: -69°C, 204°K, -92°F
+
+Time & Date : Tue Mar 26 16:43:11 2019
+802855782 ns, log ID: 2124807418
+Luminosity: 91%
+
+Time & Date : Tue Mar 26 16:43:22 2019
+
+(637485169 ns), log ID: 68710831
+ Temperature: -30°C, 243°K, -22°F
+
+Time & Date : Tue Mar 26 16:43:22 2019
+
+(640222467 ns), log ID: 68710831
+Luminosity: 6%
+
+Time & Date : Tue Mar 26 16:44:05 2019
+(547405107 ns), log ID: 632368120
+Temperature: -38°C, 235°K, -36°F
+
+Time & Date : Tue Mar 26 16:44:05 2019
+(549550965 ns), log ID: 632368120
+Luminosity: 94%
+
+Time & Date : Tue Mar 26 16:44:07 2019
+(163914607 ns), log ID: 259141258
+Temperature: 3°C, 276°K, 37°F
+
+Time & Date : Tue Mar 26 16:44:07 2019
+(166626486 ns), log ID: 259141258
+Luminosity: 55%
+
+Time & Date : Tue Mar 26 16:44:08 2019
+(341019772 ns), log ID: 65643316
+Temperature: -100°C, 173°K, -148°F
+
+Time & Date : Tue Mar 26 16:44:08 2019
+(343192072 ns), log ID: 65643316
+Luminosity: 8%
+
+Time & Date : Tue Mar 26 16:44:09 2019
+(225741182 ns), log ID: 2033287860
+Temperature: -81°C, 192°K, -113°F
+
+Time & Date : Tue Mar 26 16:44:09 2019
+(228021065 ns), log ID: 2033287860
+Luminosity: 43%
+
+Time & Date : Tue Mar 26 16:44:10 2019
+(206762203 ns), log ID: 767305133
+Temperature: -2°C, 271°K, 28°F
+
+Time & Date : Tue Mar 26 16:44:10 2019
+(208959841 ns), log ID: 767305133
+Luminosity: 38%
+
+Time & Date : Tue Mar 26 16:44:11 2019
+(435816019 ns), log ID: 591357631
+Temperature: 25°C, 298°K, 77°F
+
+Time & Date : Tue Mar 26 16:44:11 2019
+(437952455 ns), log ID: 591357631
+Luminosity: 41%
+
+Time & Date : Tue Mar 26 16:44:12 2019
+(722583769 ns), log ID: 396796964
+Temperature: -91°C, 182°K, -131°F
+
+Time & Date : Tue Mar 26 16:44:12 2019
+(725282157 ns), log ID: 396796964
+Luminosity: 57%
+
+Time & Date : Tue Mar 26 16:44:13 2019
+(729118379 ns), log ID: 1282880339
+Temperature: 3°C, 276°K, 37°F
+
+Time & Date : Tue Mar 26 16:44:13 2019
+(731666946 ns), log ID: 1282880339
+Luminosity: 63%
+
+Time & Date : Tue Mar 26 16:44:28 2019
+(252962658 ns), log ID: 635319364
+Temperature: -65°C, 208°K, -85°F
+
+Time & Date : Tue Mar 26 16:44:28 2019
+(255282142 ns), log ID: 635319364
+Luminosity: 35%
+
+Time & Date : Tue Mar 26 16:44:29 2019
+(641230102 ns), log ID: 1523428217
+Temperature: 26°C, 299°K, 78°F
+
+Time & Date : Tue Mar 26 16:44:29 2019
+(643778336 ns), log ID: 1523428217
+Luminosity: 86%
+
+Time & Date : Tue Mar 26 16:44:37 2019
+(378100535 ns), log ID: 28653753
+Temperature: -81°C, 192°K, -113°F
+
+Time & Date : Tue Mar 26 16:44:37 2019
+(380347974 ns), log ID: 28653753
+Luminosity: 31%
+
+Time & Date : Tue Mar 26 16:44:38 2019
+(537627286 ns), log ID: 1984409006
+Temperature: -98°C, 175°K, -144°F
+
+Time & Date : Tue Mar 26 16:44:38 2019
+(540285342 ns), log ID: 1984409006
+Luminosity: 26%
+
+Time & Date : Tue Mar 26 16:44:39 2019
+(997664707 ns), log ID: 724023485
+Temperature: -38°C, 235°K, -36°F
+
+Time & Date : Tue Mar 26 16:44:39 2019
+(999472968 ns), log ID: 724023485
+Luminosity: 94%
+
+Time & Date : Tue Mar 26 16:44:41 2019
+(478322111 ns), log ID: 350237984
+Temperature: -57°C, 216°K, -70°F
+
+Time & Date : Tue Mar 26 16:44:41 2019
+(481003885 ns), log ID: 350237984
+Luminosity: 63%
+
+Time & Date : Tue Mar 26 16:44:42 2019
+(475961836 ns), log ID: 1232702896
+Temperature: -72°C, 201°K, -97°F
+
+Time & Date : Tue Mar 26 16:44:42 2019
+(478249534 ns), log ID: 1232702896
+Luminosity: 96%
+
+Time & Date : Tue Mar 26 16:45:42 2019
+(364271189 ns), log ID: 1843507303
+Temperature: 14°C, 287°K, 57°F
+
+Time & Date : Tue Mar 26 16:45:42 2019
+(367592983 ns), log ID: 1843507303
+Luminosity: 50%
+
+Time & Date : Tue Mar 26 16:45:44 2019
+(632004508 ns), log ID: 400892565
+Temperature: -41°C, 232°K, -41°F
+
+Time & Date : Tue Mar 26 16:45:44 2019
+(633779745 ns), log ID: 400892565
+Luminosity: 67%
+
+Time & Date : Tue Mar 26 16:52:07 2019
+(290074888 ns), log ID: 851929173
+Temperature: -18°C, 255°K, 0°F
+
+Time & Date : Tue Mar 26 16:52:07 2019
+(292511986 ns), log ID: 851929173
+Luminosity: 18%
+
+Time & Date : Tue Mar 26 16:52:08 2019
+(426180051 ns), log ID: 647094897
+Temperature: 26°C, 299°K, 78°F
+
+Time & Date : Tue Mar 26 16:52:08 2019
+(428605107 ns), log ID: 647094897
+Luminosity: 2%
+
+Time & Date : Tue Mar 26 16:52:09 2019
+(453596797 ns), log ID: 483987897
+Temperature: -8°C, 265°K, 17°F
+
+Time & Date : Tue Mar 26 16:52:09 2019
+(456011139 ns), log ID: 483987897
+Luminosity: 88%
+
+Time & Date : Tue Mar 26 16:52:14 2019
+(803701197 ns), log ID: 1688384105
+Temperature: -48°C, 225°K, -54°F
+
+Time & Date : Tue Mar 26 16:52:14 2019
+(806378600 ns), log ID: 1688384105
+Luminosity: 28%
+
+Time & Date : Tue Mar 26 16:53:57 2019
+(961376782 ns), log ID: 1783319431
+Temperature: 24°C, 297°K, 75°F
+
+Time & Date : Tue Mar 26 16:53:57 2019
+(963622465 ns), log ID: 1783319431
+Luminosity: 72%
+
+Time & Date : Tue Mar 26 16:53:59 2019
+(405492388 ns), log ID: 344012251
+Temperature: -45°C, 228°K, -49°F
+
+Time & Date : Tue Mar 26 16:53:59 2019
+(407885824 ns), log ID: 344012251
+Luminosity: 55%
+
+Time & Date : Tue Mar 26 16:54:00 2019
+(319370742 ns), log ID: 158193990
+Temperature: -86°C, 187°K, -122°F
+
+Time & Date : Tue Mar 26 16:54:00 2019
+(322140432 ns), log ID: 158193990
+Luminosity: 78%
+
+Time & Date : Tue Mar 26 16:54:34 2019
+(901622434 ns), log ID: 256942658
+Temperature: -86°C, 187°K, -122°F
+
+Time & Date : Tue Mar 26 16:54:34 2019
+(904037284 ns), log ID: 256942658
+Luminosity: 70%
+
+Time & Date : Tue Mar 26 16:54:36 2019
+(44769181 ns), log ID: 959458952
+Temperature: -89°C, 184°K, -128°F
+
+Time & Date : Tue Mar 26 16:54:36 2019
+(47107420 ns), log ID: 959458952
+Luminosity: 55%
+
+Time & Date : Tue Mar 26 16:54:36 2019
+(988983171 ns), log ID: 959458952
+Temperature: -89°C, 184°K, -128°F
+
+Time & Date : Tue Mar 26 16:54:36 2019
+(991422038 ns), log ID: 959458952
+Luminosity: 55%
+
+Time & Date : Tue Mar 26 16:54:37 2019
+(923278480 ns), log ID: 1841551967
+Temperature: -34°C, 239°K, -29°F
+
+Time & Date : Tue Mar 26 16:54:37 2019
+(925353337 ns), log ID: 1841551967
+Luminosity: 10%
+
+Time & Date : Tue Mar 26 16:54:51 2019
+(829622082 ns), log ID: 1379888362
+Temperature: -27°C, 246°K, -16°F
+
+Time & Date : Tue Mar 26 16:54:51 2019
+(831814935 ns), log ID: 1379888362
+Luminosity: 9%
+
+Time & Date : Tue Mar 26 16:54:53 2019
+(427008911 ns), log ID: 2075991965
+Temperature: -50°C, 223°K, -58°F
+
+Time & Date : Tue Mar 26 16:54:53 2019
+(428887559 ns), log ID: 2075991965
+Luminosity: 2%
+
+Time & Date : Tue Mar 26 16:54:54 2019
+(476636011 ns), log ID: 810809783
+Temperature: 15°C, 288°K, 59°F
+
+Time & Date : Tue Mar 26 16:54:54 2019
+(478239327 ns), log ID: 810809783
+Luminosity: 95%
+
+Time & Date : Tue Mar 26 16:57:10 2019
+(578550324 ns), log ID: 120384040
+Temperature: -23°C, 250°K, -9°F
+
+Time & Date : Tue Mar 26 16:57:10 2019
+(580408996 ns), log ID: 120384040
+Luminosity: 13%
+
+Time & Date : Tue Mar 26 16:57:11 2019
+(858314602 ns), log ID: 2082305936
+Temperature: -79°C, 194°K, -110°F
+
+Time & Date : Tue Mar 26 16:57:11 2019
+(860568563 ns), log ID: 2082305936
+Luminosity: 29%
+
+Time & Date : Tue Mar 26 16:57:12 2019
+(916298512 ns), log ID: 1898105475
+Temperature: -66°C, 207°K, -86°F
+
+Time & Date : Tue Mar 26 16:57:12 2019
+(918282805 ns), log ID: 1898105475
+Luminosity: 14%
+
+Time & Date : Tue Mar 26 16:57:13 2019
+(851773330 ns), log ID: 634822443
+Temperature: -23°C, 250°K, -9°F
+
+Time & Date : Tue Mar 26 16:57:13 2019
+(854356204 ns), log ID: 634822443
+Luminosity: 17%
+
+Time & Date : Tue Mar 26 16:57:14 2019
+(752377312 ns), log ID: 459622294
+Temperature: -70°C, 203°K, -94°F
+
+Time & Date : Tue Mar 26 16:57:14 2019
+(754534211 ns), log ID: 459622294
+Luminosity: 26%
+
+Time & Date : Tue Mar 26 16:57:15 2019
+(580111660 ns), log ID: 266556637
+Temperature: -37°C, 236°K, -34°F
+
+Time & Date : Tue Mar 26 16:57:15 2019
+(582494728 ns), log ID: 266556637
+Luminosity: 67%
+
+Time & Date : Tue Mar 26 17:25:30 2019
+(632227909 ns), log ID: 1696362708
+Temperature: -14°C, 259°K, 6°F
+
+Time & Date : Tue Mar 26 17:25:30 2019
+(634359581 ns), log ID: 1696362708
+Luminosity: 86%
+
+Time & Date : Tue Mar 26 17:25:32 2019
+(909288011 ns), log ID: 246928129
+Temperature: 9°C, 282°K, 48°F
+
+Time & Date : Tue Mar 26 17:25:32 2019
+(911897004 ns), log ID: 246928129
+Luminosity: 73%
+
+Time & Date : Tue Mar 26 17:25:33 2019
+(891769242 ns), log ID: 57902831
+Temperature: -15°C, 258°K, 5°F
+
+Time & Date : Tue Mar 26 17:25:33 2019
+(893928538 ns), log ID: 57902831
+Luminosity: 89%
+
+Time & Date : Tue Mar 26 17:25:34 2019
+(669799504 ns), log ID: 2017323548
+Temperature: -89°C, 184°K, -128°F
+
+Time & Date : Tue Mar 26 17:25:34 2019
+(672307401 ns), log ID: 2017323548
+Luminosity: 91%
+
+Time & Date : Tue Mar 26 17:25:35 2019
+(564594435 ns), log ID: 760966415
+Temperature: -20°C, 253°K, -4°F
+
+Time & Date : Tue Mar 26 17:25:35 2019
+(566682133 ns), log ID: 760966415
+Luminosity: 68%
+
+Time & Date : Tue Mar 26 17:25:36 2019
+(430478775 ns), log ID: 1643509851
+Temperature: -29°C, 244°K, -20°F
+
+Time & Date : Tue Mar 26 17:25:36 2019
+(432562462 ns), log ID: 1643509851
+Luminosity: 71%
+
+Time & Date : Tue Mar 26 17:25:37 2019
+(331612907 ns), log ID: 1461069360
+Temperature: -35°C, 238°K, -31°F
+
+Time & Date : Tue Mar 26 17:25:37 2019
+(333900529 ns), log ID: 1461069360
+Luminosity: 37%
+
+Time & Date : Tue Mar 26 17:25:38 2019
+(175757483 ns), log ID: 196555234
+Temperature: -80°C, 193°K, -112°F
+
+Time & Date : Tue Mar 26 17:25:38 2019
+(178146048 ns), log ID: 196555234
+Luminosity: 68%
+
+Time & Date : Tue Mar 26 17:25:39 2019
+(106052705 ns), log ID: 1082176133
+Temperature: -22°C, 251°K, -7°F
+
+Time & Date : Tue Mar 26 17:25:39 2019
+(108826040 ns), log ID: 1082176133
+Luminosity: 82%
+
+Time & Date : Tue Mar 26 17:25:39 2019
+(883844038 ns), log ID: 1082176133
+Temperature: -22°C, 251°K, -7°F
+
+Time & Date : Tue Mar 26 17:25:39 2019
+(886138637 ns), log ID: 1082176133
+Luminosity: 82%
+
+Time & Date : Tue Mar 26 17:25:40 2019
+(653975624 ns), log ID: 900552067
+Temperature: -57°C, 216°K, -70°F
+
+Time & Date : Tue Mar 26 17:25:40 2019
+(656659749 ns), log ID: 900552067
+Luminosity: 95%
+
+Time & Date : Tue Mar 26 17:35:09 2019
+(644577896 ns), log ID: 984217874
+Temperature: 9°C, 282°K, 48°F
+
+Time & Date : Tue Mar 26 17:35:09 2019
+(646735881 ns), log ID: 984217874
+Luminosity: 49%
+
+Time & Date : Tue Mar 26 17:35:11 2019
+(868431381 ns), log ID: 1685813606
+Temperature: -11°C, 262°K, 12°F
+
+Time & Date : Tue Mar 26 17:35:11 2019
+(870258435 ns), log ID: 1685813606
+Luminosity: 73%
+
+Time & Date : Tue Mar 26 17:35:14 2019
+(745726722 ns), log ID: 48003233
+Temperature: 10°C, 283°K, 50°F
+
+Time & Date : Tue Mar 26 17:35:14 2019
+(748517718 ns), log ID: 48003233
+Luminosity: 62%
+
+Time & Date : Tue Mar 26 17:35:37 2019
+(133936943 ns), log ID: 1123730967
+Temperature: 22°C, 295°K, 71°F
+
+Time & Date : Tue Mar 26 17:35:37 2019
+(136261657 ns), log ID: 1123730967
+Luminosity: 74%
+
+Time & Date : Tue Mar 26 17:35:48 2019
+(747888589 ns), log ID: 148926069
+Temperature: -10°C, 263°K, 14°F
+
+Time & Date : Tue Mar 26 17:35:48 2019
+(749746115 ns), log ID: 148926069
+Luminosity: 30%
+
+Time & Date : Tue Mar 26 17:35:51 2019
+(273126338 ns), log ID: 1726049604
+Temperature: -92°C, 181°K, -133°F
+
+Time & Date : Tue Mar 26 17:35:51 2019
+(275671891 ns), log ID: 1726049604
+Luminosity: 36%
+
+Time & Date : Tue Mar 26 17:35:52 2019
+(439641485 ns), log ID: 1543264760
+Temperature: -71°C, 202°K, -95°F
+
+Time & Date : Tue Mar 26 17:35:52 2019
+(441458300 ns), log ID: 1543264760
+Luminosity: 29%
+
+Time & Date : Tue Mar 26 17:35:53 2019
+(408963150 ns), log ID: 1357237319
+Temperature: -77°C, 196°K, -106°F
+
+Time & Date : Tue Mar 26 17:35:53 2019
+(411213841 ns), log ID: 1357237319
+Luminosity: 27%
+
+Time & Date : Tue Mar 26 17:35:54 2019
+(272539465 ns), log ID: 1170814252
+Temperature: -69°C, 204°K, -92°F
+
+Time & Date : Tue Mar 26 17:35:54 2019
+(274611167 ns), log ID: 1170814252
+Luminosity: 51%
+
+Time & Date : Tue Mar 26 17:35:55 2019
+(93159767 ns), log ID: 2056608426
+Temperature: -4°C, 269°K, 24°F
+
+Time & Date : Tue Mar 26 17:35:55 2019
+(95639738 ns), log ID: 2056608426
+Luminosity: 8%
+
+Time & Date : Tue Mar 26 17:35:55 2019
+(936246988 ns), log ID: 2056608426
+Temperature: -4°C, 269°K, 24°F
+
+Time & Date : Tue Mar 26 17:35:55 2019
+(938644626 ns), log ID: 2056608426
+Luminosity: 8%
+
+Time & Date : Tue Mar 26 17:35:57 2019
+(553904649 ns), log ID: 609876788
+Temperature: -72°C, 201°K, -97°F
+
+Time & Date : Tue Mar 26 17:35:57 2019
+(556116913 ns), log ID: 609876788
+Luminosity: 24%
+
+Time & Date : Tue Mar 26 17:35:58 2019
+(558313004 ns), log ID: 1502752771
+Temperature: -66°C, 207°K, -86°F
+
+Time & Date : Tue Mar 26 17:35:58 2019
+(560705444 ns), log ID: 1502752771
+Luminosity: 34%
+
+Time & Date : Tue Mar 26 17:35:59 2019
+(524734039 ns), log ID: 238807932
+Temperature: -41°C, 232°K, -41°F
+
+Time & Date : Tue Mar 26 17:35:59 2019
+(527129901 ns), log ID: 238807932
+Luminosity: 31%
+
+Time & Date : Tue Mar 26 17:36:00 2019
+(392423629 ns), log ID: 52563325
+Temperature: 9°C, 282°K, 48°F
+
+Time & Date : Tue Mar 26 17:36:00 2019
+(395547139 ns), log ID: 52563325
+Luminosity: 89%
+
+Time & Date : Tue Mar 26 17:36:01 2019
+(522666493 ns), log ID: 2014760287
+Temperature: 3°C, 276°K, 37°F
+
+Time & Date : Tue Mar 26 17:36:01 2019
+(525022959 ns), log ID: 2014760287
+Luminosity: 55%
+
+Time & Date : Tue Mar 26 17:36:02 2019
+(449535689 ns), log ID: 754970204
+Temperature: -18°C, 255°K, 0°F
+
+Time & Date : Tue Mar 26 17:36:02 2019
+(451673826 ns), log ID: 754970204
+Luminosity: 14%
+
+Time & Date : Tue Mar 26 17:36:03 2019
+(227375718 ns), log ID: 1640454262
+Temperature: -96°C, 177°K, -140°F
+
+Time & Date : Tue Mar 26 17:36:03 2019
+(229767562 ns), log ID: 1640454262
+Luminosity: 16%
+
+Time & Date : Tue Mar 26 17:36:04 2019
+(405279945 ns), log ID: 1444171794
+Temperature: -34°C, 239°K, -29°F
+
+Time & Date : Tue Mar 26 17:36:04 2019
+(407372331 ns), log ID: 1444171794
+Luminosity: 94%
+
+Time & Date : Tue Mar 26 17:36:05 2019
+(376451860 ns), log ID: 1270192368
+Temperature: 13°C, 286°K, 55°F
+
+Time & Date : Tue Mar 26 17:36:05 2019
+(379155546 ns), log ID: 1270192368
+Luminosity: 53%
