@@ -1,3 +1,8 @@
+/*********************
+*Temperature task
+*Author: Sanika Dongre
+*Date created: 03/25/19
+***********************/
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
