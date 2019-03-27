@@ -1,13 +1,17 @@
 	common_sources= light_dummy.c \
 			temperature_dummy.c \
 			logger.c \
-			project.c 
+			project.c \
+			lightsensor.c \
+			tempsensor.c
 	
 	common_includes = common.h
 
 	common_flags =	-lrt \
-			-pthread
+			-pthread \
+			-lm
 			
+	ip = 10.0.0.152
 
 	CC=gcc
 	flags =	$(common_flags)
@@ -31,9 +35,10 @@
 
 .PHONY:	compile-all \
 	clean \
-	build 
+	build \
+	upload
 
-build:	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf
+build:	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf	lightsensor.elf	tempsensor.elf
 
 %.elf:%.o
 	$(CC)	-o	$@	$<	$(flags)
@@ -60,3 +65,6 @@ compile-all:	$(objects)
 
 clean :
 	rm	-f	*.o	*.s	*.i	*.o	*.d	*.elf *.swp
+
+upload:
+	sudo	scp	lightsensor.elf	tempsensor.elf	root@$(ip):/

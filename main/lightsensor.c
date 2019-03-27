@@ -25,8 +25,10 @@
 #define channel1_high 0x8F
 #define th4 0x85
 #define read_data 0x03
+
 int slave_address = 0x39;
 uint8_t value;
+
 uint8_t init_light_sensor()
 {
 	int output;
@@ -140,7 +142,6 @@ void th_read_func(int light_fd, int *data_buff)
 	value_ob = data_buff[3];
 	read(light_fd, &value_ob, 1);
 	printf("\n the fourth parameter is %x \n", data_buff[3]);
-
 }
 
 uint16_t channel0_read(int light_fd)
@@ -177,26 +178,28 @@ float get_luminosity(int light_fd)
 {
 	float datach0,datach1;
 	float adcval,lux_output;
-	datach0=0;
-	datach1=0;
 	datach0 = (float)channel0_read(light_fd);
 	datach1 = (float)channel1_read(light_fd);
-	adcval = datach0/datach1;
+	adcval = datach1/datach0;
 	if(adcval>0 && adcval <= 0.5)
 	{
 		lux_output = (0.0304 * datach0) - (0.062 * datach0 * pow(adcval, 1.4));
+		//lux_output=10;
 	}
-	else if((adcval>0.5) && (adcval<=0.61))
+	else if(adcval<=0.61)
 	{
 		lux_output = (0.0224 * datach0) - (0.031 * datach1);
+		//lux_output=20;
 	} 
-	else if((adcval>0.61)&&(adcval<=0.80))
+	else if(adcval<=0.80)
 	{
         	lux_output = (0.0128 * datach0) - (0.0153 * datach1);
+		//lux_output=30;
 	}
-	else if((adcval>0.80) && (adcval<=1.30))
+	else if(adcval<=1.30)
 	{
         	lux_output = (0.00146 * datach0) - (0.00112 * datach1);
+		//lux_output=40;
 	}
     	else
 	{

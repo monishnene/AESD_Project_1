@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <errno.h>
-#include <string.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -20,7 +19,8 @@
 #define highmask       (0x00FF)
 
 int val;
-int8_t celcius=0,kelvin=0,fahrenheit=0;
+int temp_fd;
+int16_t celcius=0,kelvin=0,fahrenheit=0;
 
 int temp_file_func()
 {
@@ -30,7 +30,7 @@ int temp_file_func()
 	return output;
 }
 
-void write_func(int temp_fd, uint8_t regval)
+void write_func(uint8_t regval)
 {
 	val= write(temp_fd, &regval, sizeof(regval));
 	if(val<0)
@@ -39,32 +39,32 @@ void write_func(int temp_fd, uint8_t regval)
 	}
 }
 
-uint16_t configreg_write_func(int temp_fd, uint16_t regval)
+uint16_t configreg_write_func(uint16_t regval)
 {
 
 	uint8_t buffer1,buffer2;
 	buffer1 = (inicond|regval)>>8;
 	buffer2 = (inicond|regval);
 	uint8_t buffer[3] = {configregaddr,buffer2,buffer1};	
-	write_func(temp_fd, configregaddr);
+	write_func(configregaddr);
 	val = write(temp_fd, &buffer, sizeof(buffer));
 	return regval;
 
 }
  
-uint16_t configreg_read_func(int temp_fd)
+uint16_t configreg_read_func()
 {
 	
 	uint16_t buffer = 0;
-	write_func(temp_fd, configregaddr);
+	write_func(configregaddr);
 	val =  read(temp_fd,&buffer,sizeof(buffer));
 	return buffer;
 }
-uint16_t tfhighreg_read_func(int temp_fd)
+uint16_t tfhighreg_read_func()
 {
 	uint8_t buffer[2] = {0}, valmsb, vallsb;
 	uint16_t high;
-	write_func(temp_fd, thighregaddr);
+	write_func(thighregaddr);
 	val = read(temp_fd,buffer,sizeof(buffer));
 	valmsb = buffer[0];
 	vallsb = buffer[1];
@@ -72,48 +72,49 @@ uint16_t tfhighreg_read_func(int temp_fd)
 	return high;
 }
 
-uint16_t thighreg_write_func(int temp_fd, uint16_t regval)
+uint16_t thighreg_write_func(uint16_t regval)
 {
 	uint8_t buffer1,buffer2;
 	buffer1 = (80|regval)>>8;
 	buffer2 = (80|regval);
 	uint8_t buffer[3] = {thighregaddr,buffer2,buffer1};
-	write_func(temp_fd, thighregaddr);
+	write_func(thighregaddr);
 	val = write(temp_fd, &buffer, sizeof(buffer));
 	return regval;
 }
 	
 
-uint16_t tlowreg_read_func(int temp_fd)
+uint16_t tlowreg_read_func()
 {
 	
 	uint16_t buffer = 0;
-	write_func(temp_fd, tlowregaddr);
+	write_func(tlowregaddr);
 	val =  read(temp_fd,&buffer,sizeof(buffer));
 	return buffer;
 }
 
-uint16_t tlowreg_write_func(int temp_fd, uint16_t regval)
+uint16_t tlowreg_write_func(uint16_t regval)
 {
 	int storeval;
 	uint8_t buffer1,buffer2;
-	write_func(temp_fd, regval);
+	write_func(regval);
 	buffer1 = (regval)>>8;
-	buffer2 = (regval)& 0x00FF ;
+	buffer2 = (regval)&highmask;
 	uint8_t buffer[3] = {tlowregaddr,buffer1,buffer2};
 	storeval = write(val, &buffer, sizeof(buffer));
 	if(storeval<0)
 	{
+		perror("error in storeval\n");		
 		return -1;
 	}
 	return 0;
 }
 
-int get_temperature(int temp_fd)
+int get_temperature()
 {
 	int data, h_bit=0;
 	uint8_t buffer[2], valmsb, vallsb;
-	write_func(temp_fd, tempregaddr);
+	write_func(tempregaddr);
 	val = read(temp_fd, &buffer, sizeof(buffer));
 	valmsb = buffer[0];
 	vallsb = buffer[1];
@@ -130,9 +131,8 @@ int get_temperature(int temp_fd)
 }
 void main()
 {
-	int temp_fd;
 	temp_fd = temp_file_func();
-	celcius = get_temperature(temp_fd);
+	celcius = get_temperature();
 	fahrenheit=celcius*1.8+32; // celcius to Fahrenheit
 	kelvin=celcius+273.15; // celcius to kelvin
 	printf("\ntemperature value in celcius is %d\n", celcius);
