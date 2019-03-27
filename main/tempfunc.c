@@ -9,53 +9,39 @@
 #include <linux/i2c-dev.h>
 #include <stdint.h>
 #include <time.h>
+#define TEMP_SLAVE_ADDR	(0x48)
+#define TEMP_REG_ADDR	(00)
 
-#define slave_addr     (0x48)
-#define tempregaddr    (00)
-
-int val;
-int temp_fd;
-int16_t celcius=0,kelvin=0,fahrenheit=0;
-
-int temp_file_func()
+void i2c_write(int32_t fd,uint8_t regval)
 {
-	int output;
-	output= open("/dev/i2c-2", O_RDWR);
-	ioctl(output, I2C_SLAVE, slave_addr);
-	return output;
-}
-
-void write_func(uint8_t regval)
-{
-	val= write(temp_fd, &regval, sizeof(regval));
-	if(val<0)
+	if(write(fd, &regval, sizeof(regval))<0)
 	{
 		perror("write function has been failed");
 	}
 }
 
+int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
+{
+	return read(fd, buffer, size);
+}
+
 int get_temperature()
 {
-	int data, h_bit=0;
-	uint8_t buffer[2], valmsb, vallsb;
-	write_func(tempregaddr);
-	val = read(temp_fd, &buffer, sizeof(buffer));
-	valmsb = buffer[0];
-	vallsb = buffer[1];
-	data = ((valmsb << 8) | vallsb) >> 4;
-	if(h_bit!=0)
-	{	
-		return data;
-	}
-	else 
-	{
-		data = data/16;
-		return data;
-	}
+	int32_t data=0,error=0,temp_fd=0;
+	uint8_t buffer[2];
+	//file open
+	temp_fd=open("/dev/i2c-2", O_RDWR);
+	ioctl(temp_fd, I2C_SLAVE, TEMP_SLAVE_ADDR);
+	//sensor tasks
+	i2c_write(temp_fd,TEMP_REG_ADDR);
+	error = i2c_read(temp_fd,buffer,sizeof(buffer));
+	data = (((buffer[0] << 8) | buffer[1]) >> 4)/16;
+	return data;
 }
+
 void main()
 {
-	temp_fd = temp_file_func();
+	int16_t celcius=0,kelvin=0,fahrenheit=0;
 	celcius = get_temperature();
 	fahrenheit=celcius*1.8+32; // celcius to Fahrenheit
 	kelvin=celcius+273.15; // celcius to kelvin
