@@ -21,7 +21,7 @@ void init_led(void)
 	}
 	else
 	{
-		fprintf(fdptr,"default");
+		fprintf(fdptr,"none");
 		fclose(fdptr);
 		
 	}
