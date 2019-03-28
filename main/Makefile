@@ -67,4 +67,4 @@ clean :
 	rm	-f	*.o	*.s	*.i	*.o	*.d	*.elf *.swp
 
 upload:
-	sudo	scp	lightsensor.elf	tempsensor.elf	root@$(ip):/
+	sudo	scp	lightsensor.elf	tempsensor.elf	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf	lightsensor.elf	tempsensor.elf	root@$(ip):/

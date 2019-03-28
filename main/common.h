@@ -11,6 +11,10 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <semaphore.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <linux/i2c-dev.h>
 
 typedef enum
 {

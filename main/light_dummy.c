@@ -16,7 +16,7 @@ void main(void)
 	sem_t* sem_light;
 	//data collection
 	log_data.data[luminosity_id]=get_luminosity();
-	printf("luminosity dummy = %d\n",log_data.data[luminosity_id]);
+	printf("luminosity dummy = %f\n",log_data.data[luminosity_id]);
 	clock_gettime(CLOCK_REALTIME,&log_data.timestamp);
 	log_data.header=light_id;
 	log_data.log_id=rand();

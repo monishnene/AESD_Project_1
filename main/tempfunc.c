@@ -30,9 +30,10 @@ int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 	return read(fd, buffer, size);
 }
 
-int get_temperature()
+float get_temperature()
 {
-	int32_t data=0,error=0,temp_fd=0;
+	float data=0;
+	int32_t error=0,temp_fd=0;
 	uint8_t buffer[2];
 	//file open
 	temp_fd=open("/dev/i2c-2", O_RDWR);
@@ -40,17 +41,17 @@ int get_temperature()
 	//sensor tasks
 	i2c_write(temp_fd,TEMP_REG_ADDR);
 	error = i2c_read(temp_fd,buffer,sizeof(buffer));
-	data = (((buffer[0] << 8) | buffer[1]) >> 4)/16;
+	data = (((buffer[0] << 8) | buffer[1]) >> 4)*0.0625;
 	return data;
 }
 
 void main()
 {
-	int16_t celcius=0,kelvin=0,fahrenheit=0;
+	float celcius=0,kelvin=0,fahrenheit=0;
 	celcius = get_temperature();
 	fahrenheit=celcius*1.8+32; // celcius to Fahrenheit
 	kelvin=celcius+273.15; // celcius to kelvin
-	printf("\ntemperature value in celcius is %d\n", celcius);
-	printf("\ntemperature value in fahrenheit is %d\n", fahrenheit);
-	printf("\ntemperature value in kelvin is %d\n", kelvin);
+	printf("\ntemperature value in celcius is %f\n", celcius);
+	printf("\ntemperature value in fahrenheit is %f\n", fahrenheit);
+	printf("\ntemperature value in kelvin is %f\n", kelvin);
 }
