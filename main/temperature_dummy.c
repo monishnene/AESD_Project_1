@@ -35,7 +35,6 @@ void main(void)
 	//declare variables
 	log_t log_data;	
 	uint8_t* shm_ptr;
-	key_t key_temp;
 	int32_t shm_temp=0,celcius=0;
 	sem_t* sem_temp;
 	//data collection
@@ -48,9 +47,8 @@ void main(void)
 	log_data.data[kelvin_id]=celcius+273.15; // celcius to kelvin
 	log_data.log_id=rand();
 	//semaphore and memory init
-	sem_temp = sem_open(shm_temp_id, O_CREAT, 0644, 1);
-	key_temp = ftok(shm_temp_id,project_id);
-	shm_temp=shmget(key_temp,LOG_SIZE,0666|IPC_CREAT);
+	sem_temp = sem_open(shm_temp_id,0);
+	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
 	//shared memory send
 	sem_wait(sem_temp);
 	shm_ptr=shmat(shm_temp,(void*)0,0);

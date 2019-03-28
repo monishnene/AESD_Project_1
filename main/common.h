@@ -21,7 +21,7 @@ typedef enum
 	kelvin_id=0,
 	celcius_id=1,
 	fahrenheit_id=2,
-	luminosity_id=0,
+	luminosity_id=2,
 	light_id=3,
 	temperature_id=4,
 	remote_id=5,
@@ -39,9 +39,12 @@ typedef struct
 
 #define LOG_SIZE sizeof(log_t)
 
+
+static uint8_t i2c_sem_id[]="sem_i2c";
+static uint8_t logfile_sem_id[]="sem_log";
 static uint8_t logfile[]="log.txt";
-static uint8_t shm_temp_id[]="temperature_dummy.c";
-static uint8_t shm_light_id[]="light_dummy.c";
+static uint8_t shm_temp_id[]="temperature_shm";
+static uint8_t shm_light_id[]="light_shm";
 static uint8_t *temp_exec[]={"./temperature_dummy.elf",NULL};;
 static uint8_t *light_exec[]={"./light_dummy.elf",NULL};
 static uint8_t *logger_exec[]={"./logger.elf",NULL};

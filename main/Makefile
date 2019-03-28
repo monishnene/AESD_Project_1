@@ -67,4 +67,6 @@ clean :
 	rm	-f	*.o	*.s	*.i	*.o	*.d	*.elf *.swp
 
 upload:
+	make	clean
+	sudo	make	PLATFORM=BBG
 	sudo	scp	lightsensor.elf	tempsensor.elf	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf	lightsensor.elf	tempsensor.elf	root@$(ip):/

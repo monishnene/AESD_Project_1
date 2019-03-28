@@ -2,18 +2,18 @@
 #define STR_SIZE 100
 
 uint8_t* str;
+int32_t n;
 FILE* fptr;
-int32_t shm_temp=0,shm_light=0,n=0;
-uint8_t* shm_ptr;
 time_t present_time;
 struct tm *time_and_date;
 
 static void log_temperature (void)
 {
 	log_t temp_data;
-	sem_t* sem_temp = sem_open(shm_temp_id, O_CREAT, 0644,0);
+	int32_t	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
+	sem_t* sem_temp = sem_open(shm_temp_id,0);
 	sem_wait(sem_temp);
-	shm_ptr=shmat(shm_temp,(void*)0,0);
+	uint8_t* shm_ptr=shmat(shm_temp,(void*)0,0);
 	memcpy(&temp_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_temp);
@@ -25,10 +25,11 @@ static void log_temperature (void)
 
 static void log_luminosity(void)
 {
-	log_t light_data;
-	sem_t* sem_light = sem_open(shm_light_id, O_CREAT, 0644,0);
+	log_t light_data;	
+	int32_t	shm_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
+	sem_t* sem_light = sem_open(shm_light_id,0);
 	sem_wait(sem_light);
-	shm_ptr=shmat(shm_light,(void*)0,0);
+	uint8_t* shm_ptr=shmat(shm_light,(void*)0,0);
 	memcpy(&light_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_light);	
@@ -40,17 +41,21 @@ static void log_luminosity(void)
 
 void main(void)
 {		
+	printf("logger running\n");
 	str=(uint8_t*)calloc(STR_SIZE,1);
 	uint32_t n=0,customer_id=0;	
-	key_t key_temp = ftok(shm_temp_id,project_id);
-	key_t key_light = ftok(shm_light_id,project_id);
-	shm_temp=shmget(key_temp,LOG_SIZE,0666|IPC_CREAT);
-	shm_light=shmget(key_light,LOG_SIZE,0666|IPC_CREAT);
-	fptr=fopen(logfile,"a");	
+	sem_t* sem_logfile = sem_open(logfile_sem_id, 0);
+	sem_wait(sem_logfile);
+	fptr=fopen(logfile,"a");
+	if(fptr==NULL)
+	{
+		printf("File opening error");
+	}	
 	log_temperature();
 	bzero(str,STR_SIZE);
 	log_luminosity();
-	fclose(fptr);
+	fclose(fptr);	
+	sem_post(sem_logfile);
 	free(str);
 }
 

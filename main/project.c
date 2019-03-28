@@ -7,7 +7,7 @@ int32_t celcius=0,fahrenheit=0,kelvin=0,luminosity=0;
 static void get_temperature (void)
 {
 	log_t temp_data;
-	sem_t* sem_temp = sem_open(shm_temp_id, O_CREAT, 0644,1);
+	sem_t* sem_temp = sem_open(shm_temp_id, 0);
 	if(!fork())
 	{
 		execvp(temp_exec[0],temp_exec);
@@ -27,7 +27,7 @@ static void get_temperature (void)
 static void get_luminosity(void)
 {
 	log_t light_data;
-	sem_t* sem_light = sem_open(shm_light_id, O_CREAT, 0644,1);
+	sem_t* sem_light = sem_open(shm_light_id, 0);
 	if(!fork())
 	{
 		execvp(light_exec[0],light_exec);
@@ -44,12 +44,39 @@ static void get_luminosity(void)
 	printf("luminosity = %d\n",light_data.data[luminosity_id]);
 }
 
-void main(void)
+int32_t system_init(void)
 {
-	key_t key_temp = ftok(shm_temp_id,project_id);
-	key_t key_light = ftok(shm_light_id,project_id);
-	shm_temp=shmget(key_temp,LOG_SIZE,0666|IPC_CREAT);
-	shm_light=shmget(key_light,LOG_SIZE,0666|IPC_CREAT);
+	sem_open(shm_temp_id, O_CREAT, 0644,1);
+	sem_open(shm_light_id, O_CREAT, 0644,1);
+	sem_open(logfile_sem_id, O_CREAT, 0644,1);
+	sem_open(i2c_sem_id, O_CREAT, 0644,1);
+}
+
+int32_t system_end(void)
+{
+	sem_unlink(shm_temp_id);	
+    	sem_unlink(shm_light_id);
+	sem_unlink(logfile_sem_id);
+	sem_unlink(i2c_sem_id);
+}
+
+
+int32_t main(int32_t argc, uint8_t **argv)
+{
+	int32_t error=0;	
+	if(argc>1)
+	{
+		if(!strcmp("init",argv[1]))
+		{
+			error=system_init();
+			if(error<0)
+			{
+				return error;		
+			}
+		}
+	}
+	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
+	shm_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
 	get_temperature();
 	get_luminosity();	
 	if(!fork())
@@ -60,6 +87,15 @@ void main(void)
 	{
 		wait(NULL);
 	}
-	sem_unlink(shm_temp_id);	
-    	sem_unlink(shm_light_id);
+	if(argc>1)
+	{
+		if (!strcmp("end",argv[1]))
+		{
+			error=system_end();
+			if(error<0)
+			{
+				return error;		
+			}	
+		}
+	}
 }
