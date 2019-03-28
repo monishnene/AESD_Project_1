@@ -11,152 +11,54 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
+#define  STR_SIZE 30
 
-#define INIT_LOC "/sys/class/gpio/export"
-#define FILE_DIR "/sys/class/gpio/gpio%d/direction"
-#define FILE_VAL "/sys/class/gpio/gpio%d/value"
-
-int low=0, high=1;
-void pin_init_func(int dir,int pinno)
+void led_on(uint8_t led)
 {
-	FILE* fdptr;
-	char* name= (char*)malloc(100*sizeof(char));
-	int i=0;
-	int acc_array[5] = {53,54,55,56,60};
-	for(i=0;i<5;i++)
-	{
-		if(pinno==acc_array[i])
-		{
-			fdptr=fopen(INIT_LOC,"w");
-			if(fdptr!=NULL)
-			{
-				fprintf(fdptr,"%d",pinno);
-				fclose(fdptr);
-				sprintf(name, FILE_DIR, pinno);
-				fdptr= fopen(name,"w");
-				if(fdptr!=NULL)
-				{
-					if(dir==0)
-					{
-						fprintf(fdptr, "in");
-					}
-					else if(dir==1)
-					{
-						fprintf(fdptr, "out");
-					}
-					else
-					{
-						printf("enter a proper direction - out or in\n");
-					}
-					fclose(fdptr);
-				}
-				else
-				{
-					perror("file opening error\n");
-				}
-			}
-			else
-			{
-				perror("file opening error\n");
-			}
-		}
-		else
-		{
-			printf("The pin number is not accessible\n");
-		}
-	}
-	free(name);
+	uint8_t* str=malloc(STR_SIZE);
+	sprintf(str,"/sys/class/gpio/gpio%d/value",led);
+	FILE* fptr=fopen(str,"w");
+	uint8_t data='1',error=0;
+	error=fwrite(&data,1,1,fptr);
+	free(str);
+	fclose(fptr);
 }
 
-void pin_write_func(int cond, int pinno)
+void led_off(uint8_t led)
 {
-	FILE *fdptr;
-	char* name= (char*)malloc(100*sizeof(char));
-	int i=0;
-	int acc_array[5] = {53,54,55,56,60};
-	for(i=0;i<5;i++)
-	{
-		if(pinno==acc_array[i])
-		{
-			sprintf(name,FILE_VAL,pinno);
-			fdptr=fopen(name,"w");
-			if(fdptr!=NULL)
-			{
-				if(cond==0)
-				{
-					fprintf(fdptr,"%d",low);
-				}
-				else if(cond==1)
-				{
-					fprintf(fdptr,"%d",high);
-				}
-				else
-				{
-					printf("enter a proper condition - 1 (high) or 0 (low)\n");
-				}
-				fclose(fdptr);
-			}
-			else
-			{
-				perror("file opening error\n");
-			}
-		}
-		else
-		{
-			printf("The pin number is not accessible\n");
-		}
-	}
-	free(name);
+	uint8_t* str=malloc(STR_SIZE);
+	sprintf(str,"/sys/class/gpio/gpio%d/value",led);
+	FILE* fptr=fopen(str,"w");
+	uint8_t data='0',error=0;
+	error=fwrite(&data,1,1,fptr);
+	free(str);
+	fclose(fptr);
 }
 
-int pin_read_func(int pinno)
+void led_toggle(uint8_t led)
 {
-	FILE* fdptr;
-	char* name = (char*)malloc(100*sizeof(char));
-	int cond; 
-	int i=0;
-	int acc_array[5] = {53,54,55,56,60};
-	for(i=0;i<5;i++)
-	{
-		if(pinno==acc_array[i])
-		{
-			sprintf(name,FILE_VAL,pinno);
-			fdptr=fopen(name,"r");
-			if(fdptr!=NULL)
-			{
-				fscanf(fdptr,"%d",&cond);
-				fclose(fdptr);
-			}
-			else
-			{
-				perror("file opening error\n");
-			}
-		}
-		else
-		{
-			printf("The pin number is not accessible\n");
-		}
-	}
-	free(name);
-	return cond;	
+	uint8_t* str=malloc(STR_SIZE);
+	sprintf(str,"/sys/class/gpio/gpio%d/value",led);
+	FILE* fptr=fopen(str,"w+");
+	uint8_t data='1',error=0,prev=0;
+	error=fread(&prev,1,1,fptr);
+	data=(prev=='0')?'1':'0';
+	error=fwrite(&data,1,1,fptr);
+	free(str);
+	fclose(fptr);
 }
 
 void main()
 {
-	int cond, pinno;
-	pinno=53;
-	pin_init_func(0,pinno);
-	pin_write_func(1,pinno);
-	cond = pin_read_func(pinno);
-	printf("%d is The value of GPIO\n",cond);
-	usleep(500);
-	pin_init_func(1,pinno);
-	pin_write_func(0,pinno);
-	cond = pin_read_func(pinno);
-	printf("%d is The value of GPIO for %d GPIO PIN\n",cond, pinno);
-	pinno=54;
-	pin_init_func(1,pinno);
-	pin_write_func(0,pinno);
-	cond = pin_read_func(pinno);
-	printf("%d is The value of GPIO for %d GPIO PIN\n",cond, pinno);
+	uint8_t led=53,i=0;
+	led_off(53);	
+	led_off(54);		
+	led_off(55);		
+	led_off(56);
+	for(i=0;i<255;i++)
+	{
+		usleep(1e5);
+		led_toggle(led);		
+		led=(led==56)?53:(led+1);
+	}
 }
