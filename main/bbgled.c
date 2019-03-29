@@ -73,7 +73,7 @@ void main()
 	led_off(1);		
 	led_off(2);		
 	led_off(3);
-	for(i=0;i<255;i++)
+	for(i=0;;i++)
 	{
 		usleep(1e5);
 		led_toggle(led);		

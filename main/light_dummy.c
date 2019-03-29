@@ -1,9 +1,109 @@
 #include "common.h"
+#include <math.h>
+#define ID_VALUE (0x50)
+#define ID_REGISTER (0x8A)
+#define LUX_SLAVE_ADDR (0x39)
+#define POWER_ADDR (0x80)
+#define TIMING_REG (0X81)
+#define TIMING_VAL (0X12)
+#define POWER_ON_CMD (0x3)
+#define POWER_OFF_CMD (0x00)
+#define CH0_L (0x8C)
+#define CH0_H (0x8D)
+#define CH1_L (0x8E)
+#define CH1_H (0x8F)
+
+void i2c_write(int32_t fd,uint8_t regval)
+{
+	if(write(fd, &regval, sizeof(regval))<0)
+	{
+		perror("write function has been failed");
+	}
+}
+
+int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
+{
+	return read(fd, buffer, size);
+}
 
 static int16_t get_luminosity()
 {
-	srand(time(NULL));
-	return rand()%100;
+	uint8_t sensor_id=0, powerval=0, timer=0;
+	int32_t error=0,fd=0;
+	uint8_t ch0_l=0,ch1_l=0,ch0_h=0,ch1_h=0;
+	uint16_t ch0=0,ch1=0;
+	float adcval=0.0;
+	int16_t lux_output=0;
+	//i2c init
+	fd=open("/dev/i2c-2", O_RDWR);
+	ioctl(fd, I2C_SLAVE, LUX_SLAVE_ADDR);	
+	//power on	
+	i2c_write(fd,POWER_ADDR);
+	i2c_write(fd,POWER_ON_CMD);
+	error=i2c_read(fd,&powerval,1);
+	if(powerval==POWER_ON_CMD)
+	{
+		printf("the value of power is %x\n", powerval);
+	}
+	i2c_write(fd,ID_REGISTER);
+	error=i2c_read(fd,&sensor_id,1);
+	if(sensor_id==ID_VALUE)
+	{
+		printf("LUX power on sensor_id=%x\n",sensor_id);
+	}
+	i2c_write(fd,TIMING_REG);
+	i2c_write(fd,TIMING_VAL);
+	error=i2c_read(fd,&timer,1);
+	if(timer==TIMING_VAL)
+	{
+		printf("the timer value is %x\n",timer);
+	}
+	//read channels
+	i2c_write(fd,CH0_L);
+	i2c_read(fd,&ch0_l,1);
+	i2c_write(fd,CH0_H);
+	i2c_read(fd,&ch0_h,1);
+	i2c_write(fd,CH1_L);
+	i2c_read(fd,&ch1_l,1);
+	i2c_write(fd,CH1_H);
+	i2c_read(fd,&ch1_h,1);	
+	printf("ch0h=%d,ch0l=%d,ch1h=%d,ch1l=%d\n",ch0_h,ch0_l,ch1_h,ch1_l);
+	ch1=(ch1_h<<8)|ch1_l;
+	ch0=(ch0_h<<8)|ch0_l;
+	adcval = (float)ch1/(float)ch0;	
+	printf("ch0=%d,ch1=%d,adcval=%f\n",ch0,ch1,adcval);
+	if(adcval>0 && adcval <= 0.5)
+	{
+		lux_output = (0.0304 * ch0) - (0.062 * ch0 * pow(adcval, 1.4));
+	}
+	else if(adcval<0.61)
+	{
+		lux_output = (0.0224 * ch0) - (0.031 * ch1);
+	} 
+	else if(adcval<0.80)
+	{
+        	lux_output = (0.0128 * ch0) - (0.0153 * ch1);
+	}
+	else if(adcval<1.30)
+	{
+        	lux_output = (0.00146 * ch0) - (0.00112 * ch1);
+	}
+    	else
+	{
+		lux_output=0;
+	}
+	//power off
+	sensor_id=0;
+	i2c_write(fd,POWER_ADDR);
+	i2c_write(fd,POWER_OFF_CMD);
+	i2c_write(fd,ID_REGISTER);
+	error=i2c_read(fd,&sensor_id,1);
+	if(sensor_id!=ID_VALUE)
+	{
+		printf("LUX power off\n");
+	}	
+	//file open	
+	return (int16_t)lux_output;
 }
 
 void main(void)

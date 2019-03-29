@@ -38,7 +38,7 @@
 	build \
 	upload
 
-build:	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf	lightsensor.elf	tempsensor.elf
+build:	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf
 
 %.elf:%.o
 	$(CC)	-o	$@	$<	$(flags)
@@ -69,4 +69,4 @@ clean :
 upload:
 	make	clean
 	sudo	make	PLATFORM=BBG
-	sudo	scp	lightsensor.elf	tempsensor.elf	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf	lightsensor.elf	tempsensor.elf	root@$(ip):/
+	sudo	scp	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf	root@$(ip):/

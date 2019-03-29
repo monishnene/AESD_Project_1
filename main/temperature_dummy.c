@@ -18,14 +18,14 @@ int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 int32_t get_temperature()
 {
 	int32_t data=0;
-	int32_t error=0,temp_fd=0;
+	int32_t error=0,fd=0;
 	uint8_t buffer[2];
 	//file open
-	temp_fd=open("/dev/i2c-2", O_RDWR);
-	ioctl(temp_fd, I2C_SLAVE, TEMP_SLAVE_ADDR);
+	fd=open("/dev/i2c-2", O_RDWR);
+	ioctl(fd, I2C_SLAVE, TEMP_SLAVE_ADDR);
 	//sensor tasks
-	i2c_write(temp_fd,TEMP_REG_ADDR);
-	error = i2c_read(temp_fd,buffer,sizeof(buffer));
+	i2c_write(fd,TEMP_REG_ADDR);
+	error = i2c_read(fd,buffer,sizeof(buffer));
 	data = (((buffer[0] << 8) | buffer[1]) >> 4)/16.0;
 	return data;
 }
