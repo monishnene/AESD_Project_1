@@ -73,4 +73,5 @@ clean :
 upload:
 	make	clean
 	sudo	make	PLATFORM=BBG
-	sudo	scp	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf	root@$(ip):/
+	sudo	scp	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf	led_init.sh	root@$(ip):/
+	

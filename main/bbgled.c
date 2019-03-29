@@ -11,16 +11,19 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
-#define STR_SIZE 30
-#define	LED_COUNT 4
+#include "bbgled.h"
 
-uint8_t *path[]={"/sys/class/gpio/gpio53/value","/sys/class/gpio/gpio54/value","/sys/class/gpio/gpio55/value","/sys/class/gpio/gpio56/value"};
+void led_init(void)
+{
+	system(led_init_cmd);
+}
 
 void led_on(uint8_t led)
 {
 	if(led<LED_COUNT)
 	{
-		FILE* fptr=fopen(path[led],"w");
+		path[pathx]='3'+led;
+		FILE* fptr=fopen(path,"w");
 		uint8_t data='1',error=0;
 		error=fwrite(&data,1,1,fptr);
 		fclose(fptr);
@@ -36,7 +39,8 @@ void led_off(uint8_t led)
 {
 	if(led<LED_COUNT)
 	{
-		FILE* fptr=fopen(path[led],"w");
+		path[pathx]='3'+led;
+		FILE* fptr=fopen(path,"w");
 		uint8_t data='0',error=0;
 		error=fwrite(&data,1,1,fptr);
 		fclose(fptr);
@@ -53,7 +57,8 @@ void led_toggle(uint8_t led)
 	printf("LED%d Toggle\n",led);
 	if(led<LED_COUNT)
 	{
-		FILE* fptr=fopen(path[led],"w+");
+		path[pathx]='3'+led;
+		FILE* fptr=fopen(path,"w+");
 		uint8_t data='1',error=0,prev=0;
 		error=fread(&prev,1,1,fptr);
 		data=(prev=='0')?'1':'0';

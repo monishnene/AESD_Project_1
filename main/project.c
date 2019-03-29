@@ -50,6 +50,7 @@ int32_t system_init(void)
 	sem_open(shm_light_id, O_CREAT, 0644,1);
 	sem_open(logfile_sem_id, O_CREAT, 0644,1);
 	sem_open(i2c_sem_id, O_CREAT, 0644,1);
+	led_init();
 }
 
 int32_t system_end(void)
