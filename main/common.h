@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <linux/i2c-dev.h>
 #include "bbgled.h"
+#define STR_SIZE 100
 
 typedef enum
 {
@@ -48,14 +49,13 @@ typedef struct
 
 #define LOG_SIZE sizeof(log_t)
 
-
+uint8_t* logfile;
 static uint8_t i2c_sem_id[]="sem_i2c";
 static uint8_t logfile_sem_id[]="sem_log";
-static uint8_t logfile[]="log.txt";
 static uint8_t shm_temp_id[]="temperature_shm";
 static uint8_t shm_light_id[]="light_shm";
-char * const temp_exec[]={"./temperature_dummy.elf",NULL};
-char * const light_exec[]={"./light_dummy.elf",NULL};
+char * const temp_exec[]={"./temperature_read.elf",NULL};
+char * const light_exec[]={"./light_read.elf",NULL};
 char * const logger_exec[]={"./logger.elf",NULL};
 #endif
 

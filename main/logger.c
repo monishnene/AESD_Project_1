@@ -1,5 +1,4 @@
 #include "common.h"
-#define STR_SIZE 100
 
 uint8_t* str;
 int32_t n;
@@ -46,7 +45,7 @@ void main(void)
 	uint32_t n=0,customer_id=0;	
 	sem_t* sem_logfile = sem_open(logfile_sem_id, 0);
 	sem_wait(sem_logfile);
-	fptr=fopen(logfile,"a");
+	fptr=fopen(logfile,"w");
 	if(fptr==NULL)
 	{
 		printf("File opening error");

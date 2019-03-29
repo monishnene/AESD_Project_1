@@ -1,5 +1,5 @@
-	common_sources= light_dummy.c \
-			temperature_dummy.c \
+	common_sources= light_read.c \
+			temperature_read.c \
 			logger.c \
 			project.c \
 			lightsensor.c \
@@ -42,7 +42,7 @@
 	build \
 	upload
 
-build:	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf
+build:	project.elf	light_read.elf	temperature_read.elf	logger.elf
 
 %.elf:%.o	$(common_objects)
 	$(CC)	-o	$@	$<	$(common_objects)	$(flags)
@@ -73,5 +73,4 @@ clean :
 upload:
 	make	clean
 	sudo	make	PLATFORM=BBG
-	sudo	scp	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf	led_init.sh	root@$(ip):/
-	
+	sudo	scp	project.elf	light_read.elf	temperature_read.elf	logger.elf	led_init.sh	root@$(ip):/

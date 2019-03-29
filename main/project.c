@@ -61,13 +61,38 @@ int32_t system_end(void)
 	sem_unlink(i2c_sem_id);
 }
 
+void logfile_setup(void)
+{
+	FILE* fptr=fopen(logfile,"r");
+	if(fptr==NULL)
+	{
+		return;
+	}
+	uint8_t* new_filename=malloc(STR_SIZE);
+	uint32_t counter=1;
+	while(fptr!=NULL)
+	{
+		fclose(fptr);
+		sprintf(new_filename,"%s(%d)",logfile,counter++);
+		fptr=fopen(new_filename,"r");	
+	}
+	rename(logfile,new_filename);
+	return;
+}
 
 int32_t main(int32_t argc, uint8_t **argv)
 {
-	int32_t error=0;	
-	if(argc>1)
+	int32_t error=0;
+	if(argc<2)
 	{
-		if(!strcmp("init",argv[1]))
+		printf("%s <logfilename> <init/end(optional)>\n",argv[0]);	
+		return 0;
+	}
+	logfile=argv[1];
+	logfile_setup();		
+	if(argc>2)
+	{
+		if(!strcmp("init",argv[2]))
 		{
 			error=system_init();
 			if(error<0)
