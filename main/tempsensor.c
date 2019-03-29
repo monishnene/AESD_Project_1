@@ -20,7 +20,7 @@
 #define highmask       (0x00FF)
 
 int val;
-int8_t celcius=0,kelvin=0,fahrenheit=0;
+int16_t celcius=0,kelvin=0,fahrenheit=0;
 
 int temp_file_func()
 {
