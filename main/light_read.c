@@ -13,19 +13,6 @@
 #define CH1_L (0x8E)
 #define CH1_H (0x8F)
 
-void i2c_write(int32_t fd,uint8_t regval)
-{
-	if(write(fd, &regval, sizeof(regval))<0)
-	{
-		perror("write function has been failed");
-	}
-}
-
-int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
-{
-	return read(fd, buffer, size);
-}
-
 static int16_t get_luminosity()
 {
 	led_toggle(light_led);
@@ -39,35 +26,35 @@ static int16_t get_luminosity()
 	fd=open("/dev/i2c-2", O_RDWR);
 	ioctl(fd, I2C_SLAVE, LUX_SLAVE_ADDR);	
 	//power on	
-	i2c_write(fd,POWER_ADDR);
-	i2c_write(fd,POWER_ON_CMD);
-	error=i2c_read(fd,&powerval,1);
+	error=write(fd,POWER_ADDR,1);
+	error=write(fd,POWER_ON_CMD,1);
+	error=read(fd,&powerval,1);
 	if(powerval==POWER_ON_CMD)
 	{
 		printf("the value of power is %x\n", powerval);
 	}
-	i2c_write(fd,ID_REGISTER);
-	error=i2c_read(fd,&sensor_id,1);
+	error=write(fd,ID_REGISTER,1);
+	error=read(fd,&sensor_id,1);
 	if(sensor_id==ID_VALUE)
 	{
 		printf("LUX power on sensor_id=%x\n",sensor_id);
 	}
-	i2c_write(fd,TIMING_REG);
-	i2c_write(fd,TIMING_VAL);
-	error=i2c_read(fd,&timer,1);
+	error=write(fd,TIMING_REG,1);
+	error=write(fd,TIMING_VAL,1);
+	error=read(fd,&timer,1);
 	if(timer==TIMING_VAL)
 	{
 		printf("the timer value is %x\n",timer);
 	}
 	//read channels
-	i2c_write(fd,CH0_L);
-	i2c_read(fd,&ch0_l,1);
-	i2c_write(fd,CH0_H);
-	i2c_read(fd,&ch0_h,1);
-	i2c_write(fd,CH1_L);
-	i2c_read(fd,&ch1_l,1);
-	i2c_write(fd,CH1_H);
-	i2c_read(fd,&ch1_h,1);	
+	error=write(fd,CH0_L,1);
+	error=read(fd,&ch0_l,1);
+	error=write(fd,CH0_H,1);
+	error=read(fd,&ch0_h,1);
+	error=write(fd,CH1_L,1);
+	error=read(fd,&ch1_l,1);
+	error=write(fd,CH1_H,1);
+	error=read(fd,&ch1_h,1);	
 	printf("ch0h=%d,ch0l=%d,ch1h=%d,ch1l=%d\n",ch0_h,ch0_l,ch1_h,ch1_l);
 	ch1=(ch1_h<<8)|ch1_l;
 	ch0=(ch0_h<<8)|ch0_l;
@@ -95,10 +82,10 @@ static int16_t get_luminosity()
 	}
 	//power off
 	sensor_id=0;
-	i2c_write(fd,POWER_ADDR);
-	i2c_write(fd,POWER_OFF_CMD);
-	i2c_write(fd,ID_REGISTER);
-	error=i2c_read(fd,&sensor_id,1);
+	error=write(fd,POWER_ADDR,1);
+	error=write(fd,POWER_OFF_CMD,1);
+	error=write(fd,ID_REGISTER,1);
+	error=read(fd,&sensor_id,1);
 	if(sensor_id!=ID_VALUE)
 	{
 		printf("LUX power off\n");
