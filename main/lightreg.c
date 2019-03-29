@@ -269,16 +269,38 @@ int main()
 	i2c_file(fd);	
 	//power on	
 	//control_reg_write(fd);
-	control_reg_read(fd);
+	//control_reg_read(fd);
+	int32_t error=0;
+	i2c_write(fd,POWER_ADDR);
+	i2c_write(fd,POWER_ON_CMD);
+	error=i2c_read(fd,&powerval,1);
+	if(powerval==POWER_ON_CMD)
+	{
+		printf("powerval is %x'n", powerval);		
+		//return powerval;
+		
+	}
 	//printf("the value of power is %x\n", powerval);
 	//identification register
-	id_reg_write(fd);
-	sensor_id= id_reg_read(fd);
-	printf("LUX power on sensor_id=%x\n",sensor_id);
+	i2c_write(fd,ID_REGISTER);
+	//id_reg_write(fd);
+	///sensor_id= id_reg_read(fd);
+	error=i2c_read(fd,&sensor_id,1);
+	if(sensor_id==ID_VALUE)
+	{
+		printf("LUX power on sensor_id=%x\n",sensor_id);
+	}
+	//printf("LUX power on sensor_id=%x\n",sensor_id);
 	//timing reg
-	timing_reg_write(fd);
-	timer= timing_reg_read(fd);
-	printf("the timer value is %x\n",timer);
+	////timing_reg_write(fd);
+	//timer= timing_reg_read(fd);
+	i2c_write(fd,TIMING_REG);
+	i2c_write(fd,TIMING_VAL);
+	error=i2c_read(fd,&timer,1);
+	if(timer==TIMING_VAL)
+	{
+		printf("the timer value is %x\n",timer);
+	}
 	//interrupt control reg
 	int_control_reg_write(fd);
 	interr=int_control_reg_read(fd);

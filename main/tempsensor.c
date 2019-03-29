@@ -60,7 +60,7 @@ uint16_t configreg_read_func(int temp_fd)
 	val =  read(temp_fd,&buffer,sizeof(buffer));
 	return buffer;
 }
-uint16_t tfhighreg_read_func(int temp_fd)
+uint16_t thighreg_read_func(int temp_fd)
 {
 	uint8_t buffer[2] = {0}, valmsb, vallsb;
 	uint16_t high;
@@ -109,7 +109,7 @@ uint16_t tlowreg_write_func(int temp_fd, uint16_t regval)
 	return 0;
 }
 
-int config_reg_fault_bits(int temp_fd, uint16_t regval)
+/*int config_reg_fault_bits(int temp_fd, uint16_t regval)
 {
 	int faultbitsval;	
 	write_func(temp_fd,regval);	
@@ -145,7 +145,7 @@ uint16_t config_reg_EM_read_func(int temp_fd)
 	write_func(temp_fd,regval);
 	em_read=read(val,&em_read,sizeof(em_read));
 	return em_read;
-}	
+}*/
 		
 int get_temperature(int temp_fd)
 {
@@ -168,8 +168,21 @@ int get_temperature(int temp_fd)
 }
 void main()
 {
+	uint16_t regval, buffer;
 	int temp_fd;
 	temp_fd = temp_file_func();
+	regval = 11;
+	regval = configreg_write_func(temp_fd, regval);
+	buffer= configreg_read_func(temp_fd);
+	printf("The config register value is %d\n", buffer);
+	regval = 10;
+	thighreg_write_func(temp_fd, regval);
+	buffer = thighreg_read_func(temp_fd);
+	printf("The thigh register value is %d\n", buffer);
+	regval = 13;
+	tlowreg_write_func(temp_fd, regval);
+	buffer = tlowreg_read_func(temp_fd);
+	printf("The tlow register value is %d\n", buffer);
 	celcius = get_temperature(temp_fd);
 	fahrenheit=celcius*1.8+32; // celcius to Fahrenheit
 	kelvin=celcius+273.15; // celcius to kelvin
