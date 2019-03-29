@@ -50,6 +50,7 @@ void led_off(uint8_t led)
 
 void led_toggle(uint8_t led)
 {
+	printf("LED%d Toggle\n",led);
 	if(led<LED_COUNT)
 	{
 		FILE* fptr=fopen(path[led],"w+");
@@ -66,6 +67,7 @@ void led_toggle(uint8_t led)
 	return;
 }
 
+#ifdef LED_TEST
 void main()
 {
 	uint8_t led=0,i=0;
@@ -80,3 +82,4 @@ void main()
 		led=(led==LED_COUNT-1)?0:(led+1);
 	}
 }
+#endif

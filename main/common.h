@@ -15,6 +15,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <linux/i2c-dev.h>
+#include "bbgled.h"
+
+typedef enum
+{
+	logger_led=0,
+	light_led=1,
+	temperature_led=2,
+	error_led=3,
+}led_t;
 
 typedef enum
 {
@@ -45,9 +54,9 @@ static uint8_t logfile_sem_id[]="sem_log";
 static uint8_t logfile[]="log.txt";
 static uint8_t shm_temp_id[]="temperature_shm";
 static uint8_t shm_light_id[]="light_shm";
-static uint8_t *temp_exec[]={"./temperature_dummy.elf",NULL};;
-static uint8_t *light_exec[]={"./light_dummy.elf",NULL};
-static uint8_t *logger_exec[]={"./logger.elf",NULL};
+char * const temp_exec[]={"./temperature_dummy.elf",NULL};
+char * const light_exec[]={"./light_dummy.elf",NULL};
+char * const logger_exec[]={"./logger.elf",NULL};
 #endif
 
 

@@ -15,7 +15,7 @@ int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 	return read(fd, buffer, size);
 }
 
-int32_t get_temperature()
+static int32_t get_temperature()
 {
 	int32_t data=0;
 	int32_t error=0,fd=0;
@@ -32,6 +32,7 @@ int32_t get_temperature()
 
 void main(void)
 {		
+	led_toggle(temperature_led);
 	//declare variables
 	log_t log_data;	
 	uint8_t* shm_ptr;
@@ -39,7 +40,6 @@ void main(void)
 	sem_t* sem_temp;
 	//data collection
 	celcius = get_temperature();
-	printf("temperature dummy = %d\n",celcius);
 	log_data.data[celcius_id]=celcius;
 	clock_gettime(CLOCK_REALTIME,&log_data.timestamp);
 	log_data.header=temperature_id;

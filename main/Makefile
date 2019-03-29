@@ -3,13 +3,17 @@
 			logger.c \
 			project.c \
 			lightsensor.c \
-			tempsensor.c
+			tempsensor.c \
+			bbgled.c
 	
-	common_includes = common.h
+	common_includes = common.h \
+			  bbgled.h
 
 	common_flags =	-lrt \
 			-pthread \
 			-lm
+
+	common_objects = bbgled.o
 			
 	ip = 10.0.0.152
 
@@ -40,8 +44,8 @@
 
 build:	project.elf	light_dummy.elf	temperature_dummy.elf	logger.elf
 
-%.elf:%.o
-	$(CC)	-o	$@	$<	$(flags)
+%.elf:%.o	$(common_objects)
+	$(CC)	-o	$@	$<	$(common_objects)	$(flags)
 
 %.i:%.c		$(includes)
 	$(CC)	-E	$<	-o	$@	$(flags)	

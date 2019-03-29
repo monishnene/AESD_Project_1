@@ -28,6 +28,7 @@ int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 
 static int16_t get_luminosity()
 {
+	led_toggle(light_led);
 	uint8_t sensor_id=0, powerval=0, timer=0;
 	int32_t error=0,fd=0;
 	uint8_t ch0_l=0,ch1_l=0,ch0_h=0,ch1_h=0;

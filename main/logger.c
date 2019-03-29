@@ -41,7 +41,7 @@ static void log_luminosity(void)
 
 void main(void)
 {		
-	printf("logger running\n");
+	led_toggle(logger_led);
 	str=(uint8_t*)calloc(STR_SIZE,1);
 	uint32_t n=0,customer_id=0;	
 	sem_t* sem_logfile = sem_open(logfile_sem_id, 0);
