@@ -1,19 +1,11 @@
-#include "common.h"
-#include <math.h>
-#define ID_VALUE (0x50)
-#define ID_REGISTER (0x8A)
-#define LUX_SLAVE_ADDR (0x39)
-#define POWER_ADDR (0x80)
-#define TIMING_REG (0X81)
-#define TIMING_VAL (0X12)
-#define POWER_ON_CMD (0x3)
-#define POWER_OFF_CMD (0x00)
-#define CH0_L (0x8C)
-#define CH0_H (0x8D)
-#define CH1_L (0x8E)
-#define CH1_H (0x8F)
+#include "light_read.h"
 
-void i2c_write(int32_t fd,uint8_t regval)
+int32_t shm_light;	
+sem_t* sem_light;
+sem_t* sem_i2c;
+uint8_t* shm_ptr;
+	
+static void i2c_write(int32_t fd,uint8_t regval)
 {
 	if(write(fd,&regval,1)<0)
 	{
@@ -21,54 +13,72 @@ void i2c_write(int32_t fd,uint8_t regval)
 	}
 }
 
-int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
+static int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 {
 	return read(fd, buffer, size);
 }
 
-static int16_t get_luminosity()
+float get_luminosity()
 {
-	led_toggle(light_led);
 	uint8_t sensor_id=0, powerval=0, timer=0;
 	int32_t error=0,fd=0;
-	uint8_t ch0_l=0,ch1_l=0,ch0_h=0,ch1_h=0;
+	uint8_t databuff=1, dataop;
+	uint8_t regval;
+	uint16_t ch0_l=0,ch1_l=0,ch0_h=0,ch1_h=0;
 	uint16_t ch0=0,ch1=0;
 	float adcval=0.0;
 	int16_t lux_output=0;
+	sem_wait(sem_i2c);
 	//i2c init
 	fd=open("/dev/i2c-2", O_RDWR);
 	ioctl(fd, I2C_SLAVE, LUX_SLAVE_ADDR);	
 	//power on	
 	i2c_write(fd,POWER_ADDR);
 	i2c_write(fd,POWER_ON_CMD);
-	error=read(fd,&powerval,1);
+	error=i2c_read(fd,&powerval,1);
 	if(powerval==POWER_ON_CMD)
 	{
 		printf("the value of power is %x\n", powerval);
 	}
-	i2c_write(fd,ID_REGISTER);
-	error=read(fd,&sensor_id,1);
-	if(sensor_id==ID_VALUE)
-	{
-		printf("LUX power on sensor_id=%x\n",sensor_id);
-	}
-	i2c_write(fd,TIMING_REG);
-	i2c_write(fd,TIMING_VAL);
-	error=read(fd,&timer,1);
-	if(timer==TIMING_VAL)
-	{
-		printf("the timer value is %x\n",timer);
-	}
 	//read channels
-	i2c_write(fd,CH0_L);
-	read(fd,&ch0_l,1);
-	i2c_write(fd,CH0_H);
-	read(fd,&ch0_h,1);
-	i2c_write(fd,CH1_L);
-	read(fd,&ch1_l,1);
-	i2c_write(fd,CH1_H);
-	read(fd,&ch1_h,1);	
-	printf("ch0h=%d,ch0l=%d,ch1h=%d,ch1l=%d\n",ch0_h,ch0_l,ch1_h,ch1_l);
+	uint8_t addr = 0x8C;
+	if(write(fd,&addr,1)!=1)
+	{
+		perror("errror in write ch0l\n");
+	}
+	if(read(fd,&ch0_l,1)!=1)
+	{
+		perror("error in read ch0l\n");
+	}
+	addr=0x8D;
+	if(write(fd,&addr,1)!=1)
+	{
+		perror("error in write ch0h\n");
+	}
+	if(read(fd,&ch0_h,1)!=1)
+	{
+		perror("error in read choh\n");
+	}
+	addr=0x8E;
+	if(write(fd,&addr,1)!=1)
+	{
+		perror("error in write ch1l\n");
+	}
+	if(read(fd,&ch1_l,1)!=1)
+	{
+		perror("error in read ch1li\n");
+	}
+	addr=0x8F;
+	if(write(fd,&addr,1)!=1)
+	{
+		perror("error in write ch1h\n");
+	}
+	if(read(fd,&ch1_h,1)!=1)
+	{
+		perror("error in read ch1h\n");
+	}	
+	sem_post(sem_i2c);
+	printf("ch0l=%d,ch1l=%d, ch0h=%d, ch1h=%d\n",ch0_l,ch1_l, ch0_l,ch0_h);
 	ch1=(ch1_h<<8)|ch1_l;
 	ch0=(ch0_h<<8)|ch0_l;
 	adcval = (float)ch1/(float)ch0;	
@@ -92,42 +102,39 @@ static int16_t get_luminosity()
     	else
 	{
 		lux_output=0;
-	}
-	//power off
-	sensor_id=0;
-	i2c_write(fd,POWER_ADDR);
-	i2c_write(fd,POWER_OFF_CMD);
-	i2c_write(fd,ID_REGISTER);
-	error=i2c_read(fd,&sensor_id,1);
-	if(sensor_id!=ID_VALUE)
-	{
-		printf("LUX power off\n");
 	}	
-	//file open	
-	return (int16_t)lux_output;
+	return lux_output;
 }
 
-void main(void)
+void light_init(void)
+{
+	printf("Light Init\n");
+	sem_light = sem_open(shm_light_id,0);
+	sem_i2c = sem_open(i2c_sem_id,0);
+	shm_light = shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
+}
+
+void* light_read(void* ptr)
 {		
+	int32_t error=0;
+	printf("Light Read\n");
+	led_toggle(light_led);
 	//declare variables
 	log_t log_data;	
-	uint8_t* shm_ptr;
-	int32_t shm_light;
-	sem_t* sem_light;
 	//data collection
-	log_data.data[luminosity_id]=get_luminosity();
-	printf("luminosity dummy = %d\n",log_data.data[luminosity_id]);
+	log_data.data[luminosity_id]=(int16_t)get_luminosity();
 	clock_gettime(CLOCK_REALTIME,&log_data.timestamp);
 	log_data.header=light_id;
 	log_data.log_id=rand();
-	//semaphore and memory init
-	sem_light = sem_open(shm_light_id,0);
-	shm_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
 	//shared memory send
+      	//sem_getvalue(sem_light,&error);
+	//printf("sem_light = %d\n",error);
 	sem_wait(sem_light);
 	shm_ptr=shmat(shm_light,(void*)0,0);	
 	memcpy(shm_ptr,&log_data,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_light);
+	printf("Light Read Done\n");
+	return ptr;
 }
 

@@ -1,64 +1,56 @@
 #include "common.h"
-
+#include "light_read.h"
+#include "logger.h"
+#include "temperature_read.h"
+#define PERIOD 5
+#define DEBUG 1
+#ifndef DEBUG
+#define printf(fmt, ...) (0)
+#endif
 int32_t shm_temp=0,shm_light=0;
 uint8_t* shm_ptr;
+void* ptr;
+sem_t* sem_temp;
+sem_t* sem_light;
 int32_t celcius=0,fahrenheit=0,kelvin=0,luminosity=0;
+pthread_t thread_light,thread_temperature,thread_logger,thread_socket;
+timer_t timerid;
+struct sigevent signal_event;
+struct itimerspec timer_data;
+struct sigaction signal_action;
+sigset_t mask;
 
-static void get_temperature (void)
+static void find_temperature (void)
 {
+	int32_t error=0;
 	log_t temp_data;
-	sem_t* sem_temp = sem_open(shm_temp_id, 0);
-	if(!fork())
-	{
-		execvp(temp_exec[0],temp_exec);
-	}
-	else
-	{
-		wait(NULL);
-	}
+	//join thread  here temperature
+	pthread_join(thread_temperature,ptr);
+      	//sem_getvalue(sem_temp,&error);
+	//printf("sem_temp = %d\n",error);
 	sem_wait(sem_temp);
 	shm_ptr=shmat(shm_temp,(void*)0,0);
+	printf("Shared Memory Access\n");
 	memcpy(&temp_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_temp);
 	printf("temperature = %d\n",temp_data.data[celcius_id]);
 }
 
-static void get_luminosity(void)
+static void find_luminosity(void)
 {
+	int32_t error=0;
 	log_t light_data;
-	sem_t* sem_light = sem_open(shm_light_id, 0);
-	if(!fork())
-	{
-		execvp(light_exec[0],light_exec);
-	}
-	else
-	{
-		wait(NULL);
-	}
+	//join thread  here light
+	pthread_join(thread_light,ptr);
+      	//sem_getvalue(sem_light,&error);
+	//printf("sem_light = %d\n",error);
 	sem_wait(sem_light);
 	shm_ptr=shmat(shm_light,(void*)0,0);
 	memcpy(&light_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_light);
 	printf("luminosity = %d\n",light_data.data[luminosity_id]);
-}
-
-int32_t system_init(void)
-{
-	sem_open(shm_temp_id, O_CREAT, 0644,1);
-	sem_open(shm_light_id, O_CREAT, 0644,1);
-	sem_open(logfile_sem_id, O_CREAT, 0644,1);
-	sem_open(i2c_sem_id, O_CREAT, 0644,1);
-	led_init();
-}
-
-int32_t system_end(void)
-{
-	sem_unlink(shm_temp_id);	
-    	sem_unlink(shm_light_id);
-	sem_unlink(logfile_sem_id);
-	sem_unlink(i2c_sem_id);
 }
 
 void logfile_setup(void)
@@ -73,55 +65,102 @@ void logfile_setup(void)
 	while(fptr!=NULL)
 	{
 		fclose(fptr);
-		sprintf(new_filename,"%s(%d)",logfile,counter++);
+		sprintf(new_filename,"backup_%d_%s",counter++,logfile);
 		fptr=fopen(new_filename,"r");	
 	}
 	rename(logfile,new_filename);
 	return;
 }
 
+int32_t system_end(void)
+{
+	sem_unlink(shm_temp_id);	
+    	sem_unlink(shm_light_id);
+	sem_unlink(led_sem_id);
+	sem_unlink(logfile_sem_id);
+	sem_unlink(i2c_sem_id);
+	exit(0);
+}
+
+int32_t bist(void)
+{
+	int32_t error=0;
+	find_temperature();
+	find_luminosity();
+	return error;
+}
+
+static void join_threads(int sig, siginfo_t *si, void *uc)
+{
+	printf("Joining Threads\n");
+	pthread_join(thread_temperature,&ptr);
+	pthread_join(thread_light,&ptr);
+	pthread_join(thread_logger,&ptr);
+}
+
+int32_t timer_init(void)
+{	
+	int32_t error=0;
+	printf("Timer Init\n");
+	// Timer init	
+	signal_action.sa_flags = SA_SIGINFO;
+	signal_action.sa_sigaction = join_threads;//Function to be executed
+	sigemptyset(&signal_action.sa_mask);
+	error=sigaction(SIGRTMIN, &signal_action, NULL);
+        signal_event.sigev_notify = SIGEV_SIGNAL;
+        signal_event.sigev_signo = SIGRTMIN;
+        signal_event.sigev_value.sival_ptr = &timerid;
+        error=timer_create(CLOCK_REALTIME, &signal_event, &timerid);
+	/* Start the timer */
+        timer_data.it_value.tv_sec = PERIOD;
+        timer_data.it_value.tv_nsec = 0;
+        timer_data.it_interval.tv_sec = timer_data.it_value.tv_sec;
+        timer_data.it_interval.tv_nsec = timer_data.it_value.tv_nsec;
+	error=timer_settime(timerid, 0, &timer_data, NULL);
+}
+
+
+int32_t system_init(void)
+{
+	int32_t error=0;	
+	printf("System Init\n");
+	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT); 
+	shm_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
+	sem_open(shm_temp_id, O_CREAT, 0644,1);
+	sem_open(led_sem_id, O_CREAT, 0644,1);
+	sem_open(shm_light_id, O_CREAT, 0644,1);
+	sem_open(logfile_sem_id, O_CREAT, 0644,1);
+	sem_open(i2c_sem_id, O_CREAT, 0644,1);	
+	logfile_setup();	
+	logger_init();
+	led_init();
+	temperature_init();
+	light_init();
+	//Signal Handling
+	//signal(SIGUSR1,kill_first_thread);
+	//signal(SIGUSR2,break_condition);
+	signal(SIGINT,system_end);
+	//pthread creation
+	error = pthread_create(&thread_temperature,NULL,temperature_read,NULL);
+	error = pthread_create(&thread_light,NULL,light_read,NULL);
+	error = pthread_create(&thread_logger,NULL,logger,NULL);
+	//pthread_create(&thread_,NULL,temperature_read,NULL);
+	error=timer_init();
+	printf("System Init Done\n");
+}
+
 int32_t main(int32_t argc, uint8_t **argv)
 {
 	int32_t error=0;
+	ptr=&error;
 	if(argc<2)
 	{
-		printf("%s <logfilename> <init/end(optional)>\n",argv[0]);	
+		printf("%s <logfilename>\n",argv[0]);	
 		return 0;
 	}
-	logfile=argv[1];
-	logfile_setup();		
-	if(argc>2)
-	{
-		if(!strcmp("init",argv[2]))
-		{
-			error=system_init();
-			if(error<0)
-			{
-				return error;		
-			}
-		}
-	}
-	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
-	shm_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
-	get_temperature();
-	get_luminosity();	
-	if(!fork())
-	{
-		execvp(logger_exec[0],logger_exec);
-	}
-	else
-	{
-		wait(NULL);
-	}
-	if(argc>1)
-	{
-		if (!strcmp("end",argv[1]))
-		{
-			error=system_end();
-			if(error<0)
-			{
-				return error;		
-			}	
-		}
-	}
+	logfile=argv[1];		
+	error=system_init();
+	error=bist();
+	while(1);
+	system_end();
 }

@@ -1,14 +1,6 @@
 #ifndef BBGLED_H
-#define BBGLED_H 
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdint.h>
-#include <linux/gpio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <time.h>
-#define STR_SIZE 30
+#define BBGLED_H
+#include "common.h"
 #define	LED_COUNT 4
 
 static uint8_t path[]="/sys/class/gpio/gpio5x/value";

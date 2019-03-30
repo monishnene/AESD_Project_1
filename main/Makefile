@@ -6,15 +6,22 @@
 			tempsensor.c \
 			bbgled.c
 	
-	common_includes = common.h \
-			  bbgled.h
+	common_includes =	common.h \
+			 	bbgled.h \
+				light_read.h \
+				temperature_read.h \
+				logger.h 
+				
 
 	common_flags =	-lrt \
 			-pthread \
 			-lm
 
-	common_objects = bbgled.o
-			
+	common_objects =	bbgled.o \
+				light_read.o \
+				temperature_read.o \
+				logger.o 
+				
 	ip = 10.0.0.152
 
 	CC=gcc
@@ -42,7 +49,7 @@
 	build \
 	upload
 
-build:	project.elf	light_read.elf	temperature_read.elf	logger.elf
+build:	project.elf
 
 %.elf:%.o	$(common_objects)
 	$(CC)	-o	$@	$<	$(common_objects)	$(flags)
@@ -73,4 +80,4 @@ clean :
 upload:
 	make	clean
 	sudo	make	PLATFORM=BBG
-	sudo	scp	project.elf	light_read.elf	temperature_read.elf	logger.elf	led_init.sh	root@$(ip):/
+	sudo	scp	project.elf	led_init.sh	root@$(ip):/
