@@ -68,7 +68,7 @@ static int16_t get_luminosity()
 	i2c_read(fd,&ch1_l,1);
 	i2c_write(fd,CH1_H);
 	i2c_read(fd,&ch1_h,1);	
-	printf("ch0h=%d,ch0l=%d,ch1h=%d,ch1l=%d\n",ch0_h,ch0_l,ch1_h,ch1_l);
+	printf("ch0l=%d,ch1l=%d\n",ch0_l,ch1_l);
 	ch1=(ch1_h<<8)|ch1_l;
 	ch0=(ch0_h<<8)|ch0_l;
 	adcval = (float)ch1/(float)ch0;	
