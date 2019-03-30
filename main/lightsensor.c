@@ -20,6 +20,12 @@
 #define CH1_L (0x8E)
 #define CH1_H (0x8F)
 
+typedef enum
+{
+	night=0,
+	day=1
+}day_night_time;
+
 void i2c_file(int32_t fd)
 {
 	fd=open("/dev/i2c-2", O_RDWR);
@@ -125,10 +131,34 @@ float get_luminosity(int32_t fd)
 	return lux_output;
 }
 
+uint8_t day_night(int32_t fd)
+{
+	float lux_output = get_luminosity(fd);
+	printf("%f lux value\n", lux_output);
+	if(lux_output>10)
+	{
+		return day;
+	}
+	else
+	{
+		return night;
+	}
+}
+
 int main()
 {
 	float lux_output;
 	int32_t fd;
-	lux_output = get_luminosity(fd);
-	printf("The obtained lux value is %f\n", lux_output);
+	uint8_t op;
+	op= day_night(fd);
+	if(op==1)
+	{
+		printf("It is day time\n");
+	}
+	else
+	{
+		printf("It is night time\n");
+	}
+	//lux_output = get_luminosity(fd);
+	//printf("The obtained lux value is %f\n", lux_output);
 }
