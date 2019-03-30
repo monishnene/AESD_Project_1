@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
-#include <netinet.h>
+#include <netinet/in.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
@@ -26,7 +26,7 @@ int main(void)
 	server_addr.sin_port= htons(10001);
 	server_addr.sin_addr.s_addr=htonl(INADDR_ANY);
 	serverlen = sizeof(struct sockaddr_in);
-	if(bind(sockfd,(struct sockaddr*)&server_addr,sizeof(serveraddr))<0)
+	if(bind(sockfd,(struct sockaddr*)&server_addr,sizeof(server_addr))<0)
 	{
 		perror("socket binding error\n");
 	}

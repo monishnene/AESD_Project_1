@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
-#include <netinet.h>
+#include <netinet/in.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ int main(void)
 	server_addr.sin_family=AF_INET;
 	server_addr.sin_port = htons(10001);
 	hostptr=gethostbyname(IP_ADDR);
-	memcpy(&server_addr,sin_addr,hostptr->h_addr,hostptr->h_length);
+	memcpy(&server_addr.sin_addr,hostptr->h_addr,hostptr->h_length);
 	if((connect(sockfd,(struct  sockaddr*)&server_addr, sizeof(server_addr)))<0)
 	{
 		printf("server is not connection ready\n");
@@ -52,7 +52,7 @@ int main(void)
 					
 					case 2:
 					printf("Temperature value is %f\n", data);
-					break
+					break;
 					
 					default:
 					printf("The operation is invalid\n");
