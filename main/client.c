@@ -13,8 +13,7 @@
 
 int main(void)
 {
-	int sockfd, operation, send_data, received;
-	float data;
+	int sockfd, operation, send_data, received, data;
 	struct sockaddr_in server_addr;
 	struct hostent* hostptr;
 	sockfd=socket(AF_INET,SOCK_STREAM,0);
@@ -41,17 +40,17 @@ int main(void)
 		received = read(sockfd,&data,sizeof(data));
 		if(received==sizeof(data))
 		{
-			printf("The received data is %f\n", data);
+			printf("The received data is %d\n", data);
 			if(data<0)
 			{
 				switch(operation)
 				{
 					case 1:
-					printf("Lux value is %f\n",data);
+					printf("Lux value is %d\n",data);
 					break;
 					
 					case 2:
-					printf("Temperature value is %f\n", data);
+					printf("Temperature value is %d\n", data);
 					break;
 					
 					default:

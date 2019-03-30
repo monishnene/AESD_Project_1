@@ -11,8 +11,7 @@
 
 int main(void)
 {
-	int sockfd, conn, serverlen, data=10, received, input, send_data;
-	const float temp=20.0;
+	int sockfd, conn, serverlen, data=10, received, input, send_data, temp=20;
 	struct hostent* hostptr;
 	struct sockaddr_in server_addr, client_addr;
 	sockfd = socket(AF_INET, SOCK_STREAM,0);
