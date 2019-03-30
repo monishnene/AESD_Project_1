@@ -13,7 +13,7 @@
 
 int main(void)
 {
-	int sockfd, operation, send_data, received, data;
+	int sockfd, operation, send_data, received, data, acc_conn;
 	struct sockaddr_in server_addr;
 	struct hostent* hostptr;
 	sockfd=socket(AF_INET,SOCK_STREAM,0);
@@ -27,7 +27,8 @@ int main(void)
 	server_addr.sin_port = htons(10001);
 	hostptr=gethostbyname(IP_ADDR);
 	memcpy(&server_addr.sin_addr,hostptr->h_addr,hostptr->h_length);
-	if((connect(sockfd,(struct  sockaddr*)&server_addr, sizeof(server_addr)))<0)
+	acc_conn = connect(sockfd,(struct  sockaddr*)&server_addr, sizeof(server_addr));
+	if((acc_conn)<0)
 	{
 		printf("server is not connection ready\n");
 		exit(-1);
@@ -36,8 +37,8 @@ int main(void)
 	{
 		printf("\n Enter the operation to be performed: 1) Get lux 2) Get temp\n");
 		scanf("%d",&operation);
-		send(sockfd,(void*)&data,sizeof(data)+1,0);
-		received = read(sockfd,&data,sizeof(data));
+		send(sockfd,(void*)&data,sizeof(data),0);
+		received = recv(sockfd,&data,sizeof(data),0);
 		if(received==sizeof(data))
 		{
 			printf("The received data is %d\n", data);
@@ -67,4 +68,3 @@ int main(void)
 	  }
 	  return 0;
 }
-	

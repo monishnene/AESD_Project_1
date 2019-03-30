@@ -43,13 +43,13 @@ int main(void)
 	puts("connection accepted\n");
 	while(1)
 	{
-		received=read(conn,&input,sizeof(input));
+		received=recv(sockfd,&input,sizeof(input),0);
 		if(input==received)
 		{
 			printf("The data received by server from client is %d\n",input);
 			if(input==2)
 			{
-				send_data=send(conn,(void*)&temp,sizeof(temp)+1,0);
+				send_data=send(sockfd,(void*)&temp,sizeof(temp),0);
 			}
 		}
 	}
