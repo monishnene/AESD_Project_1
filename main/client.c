@@ -37,12 +37,14 @@ int main(void)
 	{
 		printf("\n Enter the operation to be performed: 1) Get lux 2) Get temp\n");
 		scanf("%d",&operation);
-		send(sockfd,(void*)&data,sizeof(data),0);
-		received = recv(sockfd,&data,sizeof(data),0);
+		send_data= send(sockfd,(void*)&operation,sizeof(operation),0);
+		printf("%d send data\n", send_data);
+		received = read(sockfd,&data,sizeof(data));
+		printf("%d received data from server\n", received);
 		if(received==sizeof(data))
 		{
 			printf("The received data is %d\n", data);
-			if(data<0)
+			if(data!=0)
 			{
 				switch(operation)
 				{

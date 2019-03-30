@@ -43,13 +43,15 @@ int main(void)
 	puts("connection accepted\n");
 	while(1)
 	{
-		received=recv(sockfd,&input,sizeof(input),0);
-		if(input==received)
+		received=read(conn,&input,sizeof(input));
+		printf("%d received data from client\n", received);
+		if(received==sizeof(input))
 		{
 			printf("The data received by server from client is %d\n",input);
 			if(input==2)
 			{
-				send_data=send(sockfd,(void*)&temp,sizeof(temp),0);
+				send_data=send(conn,(void*)&temp,sizeof(temp),0);
+				printf("%d data sent to client\n", send_data);
 			}
 		}
 	}
