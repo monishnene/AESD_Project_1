@@ -33,6 +33,7 @@ int main(void)
 		printf("server is not connection ready\n");
 		exit(-1);
 	}
+	received = write(sockfd,&data,sizeof(data));
 	received = read(sockfd,&data,sizeof(data));
 	if(data>-10)
 	{

@@ -53,7 +53,7 @@ typedef struct
 #define LOG_SIZE sizeof(log_t)
 
 uint8_t* logfile;
-static uint8_t condition;
+static uint8_t condition=1;
 static uint8_t i2c_sem_id[]="sem_i2c";
 static uint8_t logfile_sem_id[]="sem_logfile";
 static uint8_t shm_temp_id[]="temperature";

@@ -74,21 +74,17 @@ void remote_server(void)
 		{
 			printf("connection accepted\n");
 		}
-		fork_child=fork();
-		if(fork_child==0)
+		size=recv(conn,&size,sizeof(size),0);
+		if(!fork())
 		{
 			temp=find_temperature();
 			light=find_luminosity();
-			size=send(conn,&light,sizeof(light),0);
-			size=send(conn,&temp,sizeof(temp),0);
+			size=write(conn,&light,sizeof(light));
+			size=write(conn,&temp,sizeof(temp));
 			printf("Data sent to client\n");
 			break;
 		}
 	}
 	close(sockfd);
-	if(!condition)
-	{
-		printf("\nServer Closed\n");
-	}
 	return;
 }
