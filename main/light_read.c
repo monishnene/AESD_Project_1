@@ -78,11 +78,11 @@ float get_luminosity()
 		perror("error in read ch1h\n");
 	}	
 	sem_post(sem_i2c);
-	//printf("ch0l=%d,ch1l=%d, ch0h=%d, ch1h=%d\n",ch0_l,ch1_l, ch0_l,ch0_h);
+	printf("ch0l=%d,ch1l=%d, ch0h=%d, ch1h=%d\n",ch0_l,ch1_l, ch0_l,ch0_h);
 	ch1=(ch1_h<<8)|ch1_l;
 	ch0=(ch0_h<<8)|ch0_l;
 	adcval = (float)ch1/(float)ch0;	
-	//printf("ch0=%d,ch1=%d,adcval=%f\n",ch0,ch1,adcval);
+	printf("ch0=%d,ch1=%d,adcval=%f\n",ch0,ch1,adcval);
 	if(adcval>0 && adcval <= 0.5)
 	{
 		lux_output = (0.0304 * ch0) - (0.062 * ch0 * pow(adcval, 1.4));

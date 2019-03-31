@@ -35,7 +35,7 @@ static int16_t find_luminosity(void)
 
 void remote_server(void)
 {
-	int32_t sockfd=0, conn=0, fork_child=1, serverlen=0, size=0, temp=0, light=0;
+	int32_t sockfd=0,conn=0, fork_child=1, serverlen=0, size=0, temp=0, light=0;
 	struct hostent* hostptr;
 	struct sockaddr_in server_addr, client_addr;
 	sockfd = socket(AF_INET, SOCK_STREAM,0);	

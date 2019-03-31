@@ -52,7 +52,7 @@ void* server_run(void* ptr)
 {
 	//printf("server_run\n");
 	remote_server();
-	//printf("Exiting server thread\n");
+	printf("Exiting server thread\n");
 	pthread_exit(ptr);
 }
 
@@ -193,7 +193,10 @@ int32_t main(int32_t argc, uint8_t **argv)
 		printf("Error Creating Server Thread\n");
 		kill(getpid(),SIGINT);
 	}
-	error=pthread_join(thread_server,NULL);
+	if(!fork())
+	{
+		error=pthread_join(thread_server,NULL);
+	}
 	if(error)
 	{	
 		printf("Error Joining Server Thread %d\n",error);
