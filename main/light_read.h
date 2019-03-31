@@ -16,7 +16,7 @@
 #define CH1_L (0x8E)
 #define CH1_H (0x8F)
 
-void* light_read(void* ptr);
+void light_read(void);
 void light_init(void);
 
 #endif
