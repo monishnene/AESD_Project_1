@@ -26,7 +26,7 @@
 *******************************************/
 
 #define IP_ADDR "10.0.0.152" //ip addr
-#define PORT_ADDRESS 10001
+#define PORT_ADDRESS 8005
 
 int main(void)
 {

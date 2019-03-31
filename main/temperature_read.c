@@ -85,8 +85,8 @@ void temperature_init(void)
 *******************************************/
 
 void temperature_read(void)
-{	
-	//printf("Temperature Read\n");
+{
+	uint8_t* msg= (uint8_t*)malloc(STR_SIZE);
 	led_toggle(temperature_led);
 	//declare variables
 	log_t log_data;	
@@ -98,14 +98,15 @@ void temperature_read(void)
 	log_data.header=temperature_id;
 	log_data.data[fahrenheit_id]=(celcius*1.8)+32.0; // celcuis to Fahrenheit
 	log_data.data[kelvin_id]=celcius+273.15; // celcius to kelvin
-	log_data.log_id=rand();
 	//shared memory send
 	sem_wait(sem_temp);
 	shm_ptr=shmat(shm_temp,(void*)0,0);
 	memcpy(shm_ptr,&log_data,LOG_SIZE);
 	shmdt(shm_ptr);
-	sem_post(sem_temp);
-	//printf("Temperature Read Done\n");
+	sem_post(sem_temp);	
+	sprintf(msg,"Temperature: %d°C, %d°K, %d°F",log_data.data[celcius_id],log_data.data[kelvin_id],log_data.data[fahrenheit_id]);
+	log_creator(LOG_DATA,msg);
+	free(msg);
 	return;
 }
 

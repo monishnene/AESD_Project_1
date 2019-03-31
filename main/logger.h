@@ -16,5 +16,6 @@
 
 void logger_init(void);
 void logger(void);
+void log_creator(uint8_t logid, uint8_t* str);
 
 #endif

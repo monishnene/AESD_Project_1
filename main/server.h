@@ -14,14 +14,10 @@
 *******************************************/
 
 #include "common.h"
-#include <sys/socket.h>
-#include <netinet/in.h>
 
 /*******************************************
 * Macro
 *******************************************/
-
-#define PORT_ADDRESS 10001
 
 void remote_server(void);
 #endif

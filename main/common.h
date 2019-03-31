@@ -25,7 +25,19 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-#define STR_SIZE 100
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include "logger.h"
+#define STR_SIZE 200
+#define LOGPORT 8002
+#define PORT_ADDRESS 8003
+
+typedef enum
+{
+	LOG_INFO=0,
+	LOG_DATA=1,
+	LOG_ERROR=2,
+}logtype_t;
 
 typedef enum               //enum to turn on/off leds according to the tasks
 {
@@ -51,7 +63,6 @@ typedef enum              //enum with id values  assigned according to tasks
 typedef struct
 {
 	header_t header;
-	uint32_t log_id;
 	struct timespec timestamp;
 	int32_t data[3];  
 }log_t;
@@ -59,7 +70,10 @@ typedef struct
 #define LOG_SIZE sizeof(log_t)
 
 uint8_t* logfile;
+static uint8_t* logtype[]={"LOG_INFO","LOG_DATA","LOG_ERROR"};
 static uint8_t condition=1;
+static uint8_t logger_ready_id[]="check if logger is ready";
+static uint8_t trigger_sem_id[]="sem_trigger";
 static uint8_t i2c_sem_id[]="sem_i2c";
 static uint8_t logfile_sem_id[]="sem_logfile";
 static uint8_t shm_temp_id[]="temperature";

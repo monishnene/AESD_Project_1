@@ -22,9 +22,8 @@ sem_t* sem_led;
 *************************************/
 void led_init(void)
 {	
-	printf("LED Init\n");
-	sem_led = sem_open(led_sem_id,0);
-	system(led_init_cmd);
+	sem_led = sem_open(led_sem_id,0);	
+	system(led_init_cmd);		
 }
 /**************************************
 * LED ON function to turn on the USR LEDs

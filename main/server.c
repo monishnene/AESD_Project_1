@@ -80,7 +80,6 @@ void remote_server(void)
 	{
 		perror("socket creation error\n");
 	}
-	puts("socket created successful\n");
 	memset((char*)&server_addr,0,sizeof(server_addr));
 	server_addr.sin_family=AF_INET;
 	server_addr.sin_port= htons(PORT_ADDRESS);
@@ -91,13 +90,12 @@ void remote_server(void)
 	{
 		perror("socket binding error\n");
 	}
-	printf("socket binding successful\n");
 	//listen
 	if(listen(sockfd,5)<0)
 	{
 		perror("socket listening error\n");
 	}
-	printf("socket listening successful\n");
+	log_creator(LOG_INFO,"Server Started and waiting for remote client requests");
 	while(condition)
 	{
 		//connection accept
@@ -113,6 +111,7 @@ void remote_server(void)
 		size=recv(conn,&size,sizeof(size),0);
 		if(!fork()) 
 		{
+			log_creator(LOG_INFO,"Data sent to remote client from server");
 			temp=find_temperature();
 			light=find_luminosity();
 			size=write(conn,&light,sizeof(light)); //send lux value to client
