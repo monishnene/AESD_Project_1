@@ -151,24 +151,13 @@ int main()
 	}
 	//identification test
 	id_op=id_reg_test(fd);
-	if(id_op==1)
+	if(id_op==50)
 	{
 		printf("The identification register matches - BIST Successfull\n");
 	}
 	else
 	{
 		perror(" Identification register isn't correct- BIST test failed\n");
-	}
-	//i2c test
-	op1=i2c_write(fd,TIMING_REG);
-	error=i2c_read(fd,&readop,1);
-	if(readop==81)
-	{
-		printf("The I2C works - BIST Successfull\n");
-	}
-	else
-	{
-		perror("The I2C fails - BIST is not successfull\n");
 	}
 	//power on	
 	i2c_write(fd,POWER_ADDR);
@@ -183,39 +172,27 @@ int main()
 	{
 		perror("The light sensor has not been powered up\n");
 	}
-	//pthread test
-	error = pthread_create(&thread_temperature,NULL,temperature_run,NULL);
-	if(error)
+	//i2c test
+	op1=i2c_write(fd,TIMING_REG);
+	error=i2c_read(fd,&readop,1);
+	if(readop==81)
 	{
-		printf("Error Creating Temperature Thread\n");
-		kill(getpid(),SIGINT);
+		printf("The I2C works - BIST Successfull\n");
 	}
-	error = pthread_create(&thread_light,NULL,light_run,NULL);
-	if(error)
+	else
 	{
-		printf("Error Creating Light Thread\n");
-		kill(getpid(),SIGINT);
+		perror("The I2C fails - BIST is not successfull\n");
 	}
-	error = pthread_create(&thread_logger,NULL,logger_run,NULL);
-	if(error)
+	//temp sensor
+	op=i2c_file(fd); //i2c file
+	//sensor connection test
+	if(op==1)
 	{
-		printf("Error Creating Logger Thread\n");
-		kill(getpid(),SIGINT);
+		printf("The initialization is done and the  temp sensor is connected\n");
 	}
-	printf("Joining Threads\n");
-	error=pthread_join(thread_temperature,NULL);
-	if(error)
+	else
 	{
-		printf("Error Joining Temperature Thread %d\n",error);
+		perror("The temp sensor is not connected thus I/O error\n");
 	}
-	error=pthread_join(thread_light,NULL);
-	if(error)
-	{
-		printf("Error Joining light Thread %d\n",error);
-	}
-	error=pthread_join(thread_logger,NULL);
-	if(error)
-	{
-		printf("Error Joining logger Thread %d\n",error);
-	}
+	
 }
