@@ -11,7 +11,7 @@
 
 int main(void)
 {
-	int sockfd, conn, serverlen, data=10, received, input, send_data, temp=20;
+	int sockfd, conn, fork_child=1, serverlen, data=10, received, input, send_data, temp=20;
 	struct hostent* hostptr;
 	struct sockaddr_in server_addr, client_addr;
 	sockfd = socket(AF_INET, SOCK_STREAM,0);
@@ -35,23 +35,28 @@ int main(void)
 		perror("socket listening error\n");
 	}
 	puts("socket listening successfull\n");
-	conn=accept(sockfd,(struct sockaddr*)&client_addr,&serverlen);
-	if(conn<0)
-	{
-		perror("connection accept failed\n");
-	}
-	puts("connection accepted\n");
 	while(1)
 	{
-		received=read(conn,&input,sizeof(input));
-		printf("%d received data from client\n", received);
-		if(received==sizeof(input))
+		
+		conn=accept(sockfd,(struct sockaddr*)&client_addr,&serverlen);
+		if(conn<0)
 		{
-			printf("The data received by server from client is %d\n",input);
-			if(input==2)
+			perror("connection accept failed\n");
+		}
+		puts("connection accepted\n");
+		fork_child=fork();
+		if(fork_child==0)
+		{
+			received=read(conn,&input,sizeof(input));
+			printf("%d received data from client\n", received);
+			if(received==sizeof(input))
 			{
-				send_data=send(conn,(void*)&temp,sizeof(temp),0);
-				printf("%d data sent to client\n", send_data);
+				printf("The data received by server from client is %d\n",input);
+				if(input==2)
+				{
+					send_data=send(conn,(void*)&temp,sizeof(temp),0);
+					printf("%d data sent to client\n", send_data);
+				}
 			}
 		}
 	}
