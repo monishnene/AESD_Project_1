@@ -1,13 +1,34 @@
+/******************************************
+* project.c
+* Main task
+* Author: Monish Nene and Sanika Dongre
+* Date created: 03/28/19
+*******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
+
 #include "common.h"
 #include "light_read.h"
 #include "logger.h"
 #include "temperature_read.h"
 #include "server.h"
+
+/*******************************************
+* Macros
+*******************************************/
+
 #define PERIOD 5
 #define DEBUG 1
 #ifndef DEBUG
 #define printf(fmt, ...) (0)
 #endif
+
+/*******************************************
+* Global variables
+*******************************************/
+
 int32_t shm_temp=0,shm_light=0;
 uint8_t trigger=1;
 uint8_t* shm_ptr;
@@ -22,6 +43,12 @@ struct sigaction signal_action;
 pthread_t thread_light,thread_temperature,thread_logger,thread_server;
 sigset_t mask;
 
+/*****************************
+* Temperature run function
+* runs the temperature task
+* and exits the thread
+********************************/
+
 void* temperature_run(void* ptr)
 {
 	//printf("Temperature run\n");
@@ -30,6 +57,11 @@ void* temperature_run(void* ptr)
 	pthread_exit(ptr);
 }
 
+/*****************************
+* light run function
+* runs the light task
+* and exits the thread
+********************************/
 
 void* light_run(void* ptr)
 {
@@ -39,6 +71,11 @@ void* light_run(void* ptr)
 	pthread_exit(ptr);
 }
 
+/*****************************
+* logger run function
+* runs the logger task
+* and exits the thread
+********************************/
 
 void* logger_run(void* ptr)
 {
@@ -48,6 +85,12 @@ void* logger_run(void* ptr)
 	pthread_exit(ptr);
 }
 
+/**************************************
+* Remote Socket server run function
+* runs the socket server task
+* and exits the thread
+***************************************/
+
 void* server_run(void* ptr)
 {
 	//printf("server_run\n");
@@ -55,6 +98,11 @@ void* server_run(void* ptr)
 	printf("Exiting server thread\n");
 	pthread_exit(ptr);
 }
+
+/*****************************
+* find temperature function
+* celsius value is printed
+********************************/
 
 static void find_temperature(void)
 {
@@ -71,6 +119,10 @@ static void find_temperature(void)
 	return;
 }
 
+/*****************************
+* find luminosity function
+* lux value is printed
+********************************/
 static void find_luminosity(void)
 {
 	int32_t error=0;
@@ -85,6 +137,9 @@ static void find_luminosity(void)
 	return;
 }
 
+/*****************************
+* log file setup function
+********************************/
 void logfile_setup(void)
 {
 	FILE* fptr=fopen(logfile,"r");
@@ -97,12 +152,18 @@ void logfile_setup(void)
 	while(fptr!=NULL)
 	{
 		fclose(fptr);
-		sprintf(new_filename,"backup_%d_%s",counter++,logfile);
+		sprintf(new_filename,"backup_%d_%s",counter++,logfile); //to create backup files
 		fptr=fopen(new_filename,"r");	
 	}
 	rename(logfile,new_filename);
 	return;
 }
+
+/*****************************
+* System end function
+* unlinks the linked memories for
+* different tasks
+********************************/
 
 void system_end(int sig)
 {
@@ -114,6 +175,11 @@ void system_end(int sig)
 	sem_unlink(i2c_sem_id);
 }
 
+/*****************************
+* bist function
+* to perform built in startuo
+********************************/
+
 int32_t bist(void)
 {
 	int32_t error=0;
@@ -122,11 +188,19 @@ int32_t bist(void)
 	return error;
 }
 
+/*************************************
+* join threads based on trigger value
+***************************************/
+
 static void join_threads(int sig, siginfo_t *si, void *uc)
 {
 	trigger=1;
 }
 
+/*************************
+* Timer init
+* Setting up the timer
+***************************/
 int32_t timer_init(void)
 {	
 	int32_t error=0;
@@ -148,6 +222,10 @@ int32_t timer_init(void)
 	error=timer_settime(timerid, 0, &timer_data, NULL);
 }
 
+/**********************************
+* system init
+* To initialize the shared memory
+***********************************/
 
 int32_t system_init(void)
 {
@@ -181,13 +259,13 @@ int32_t main(int32_t argc, uint8_t **argv)
 	ptr=&error;
 	if(argc<2)
 	{
-		printf("%s <logfilename>\n",argv[0]);	
+		printf("%s <logfilename>\n",argv[0]);	 //log file name as command line argument
 		return 0;
 	}
 	logfile=argv[1];		
 	error=system_init();
 	error=bist();
-	error=pthread_create(&thread_server,NULL,server_run,NULL);
+	error=pthread_create(&thread_server,NULL,server_run,NULL);   //error checks
 	if(error)
 	{
 		printf("Error Creating Server Thread\n");
@@ -203,7 +281,7 @@ int32_t main(int32_t argc, uint8_t **argv)
 	}
 	while(condition)
 	{
-		if(trigger)
+		if(trigger)  
 		{
 			//pthread creation
 			error = pthread_create(&thread_temperature,NULL,temperature_run,NULL);
@@ -225,6 +303,7 @@ int32_t main(int32_t argc, uint8_t **argv)
 				kill(getpid(),SIGINT);
 			}
 			printf("Joining Threads\n");
+			//pthread join
 			error=pthread_join(thread_temperature,NULL);
 			if(error)
 			{

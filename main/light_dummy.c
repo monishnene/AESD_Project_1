@@ -1,5 +1,17 @@
+/******************************************
+* light_dummy.c
+* Author: Sanika Dongre and Monish Nene
+* Date created: 03/21/19
+*******************************************/
+
+/*****************
+*Includes
+********************/
 #include "common.h"
 #include <math.h>
+/********************
+*Macros
+*********************/
 #define ID_VALUE (0x50)
 #define ID_REGISTER (0x8A)
 #define LUX_SLAVE_ADDR (0x39)
@@ -13,6 +25,9 @@
 #define CH1_L (0x8E)
 #define CH1_H (0x8F)
 
+/********************
+* Write operation 
+***********************/
 void i2c_write(int32_t fd,uint8_t regval)
 {
 	if(write(fd, &regval, sizeof(regval))<0)
@@ -20,11 +35,20 @@ void i2c_write(int32_t fd,uint8_t regval)
 		perror("write function has been failed");
 	}
 }
-
+/***************************
+* Read operation
+****************************/
 int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 {
 	return read(fd, buffer, size);
 }
+
+/********************************************************
+* Get luminosity function
+* Reads data registers (0 and 1)
+* and then lux output is calculated based on formula
+* return the lux value
+*****************************************************/
 
 static int16_t get_luminosity()
 {
@@ -46,12 +70,14 @@ static int16_t get_luminosity()
 	{
 		printf("the value of power is %x\n", powerval);
 	}
+	//read identification register
 	i2c_write(fd,ID_REGISTER);
 	error=i2c_read(fd,&sensor_id,1);
 	if(sensor_id==ID_VALUE)
 	{
 		printf("LUX power on sensor_id=%x\n",sensor_id);
 	}
+	//timing register
 	i2c_write(fd,TIMING_REG);
 	i2c_write(fd,TIMING_VAL);
 	error=i2c_read(fd,&timer,1);
@@ -73,6 +99,7 @@ static int16_t get_luminosity()
 	ch0=(ch0_h<<8)|ch0_l;
 	adcval = (float)ch1/(float)ch0;	
 	printf("ch0=%d,ch1=%d,adcval=%f\n",ch0,ch1,adcval);
+	//adcval range check
 	if(adcval>0 && adcval <= 0.5)
 	{
 		lux_output = (0.0304 * ch0) - (0.062 * ch0 * pow(adcval, 1.4));
@@ -103,7 +130,6 @@ static int16_t get_luminosity()
 	{
 		printf("LUX power off\n");
 	}	
-	//file open	
 	return (int16_t)lux_output;
 }
 

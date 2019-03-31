@@ -1,5 +1,20 @@
+/******************************************
+* light_test.c
+* Author: Sanika Dongre and Monish Nene
+* Date created: 03/29/19
+*******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
+
 #include "common.h"
 #include <math.h>
+
+/*******************************************
+* Macros
+*******************************************/
+
 #define ID_VALUE (0x50)
 #define ID_REGISTER (0x8A)
 #define ID_VAL (0X07)
@@ -22,11 +37,15 @@
 #define CH1_L (0x8E)
 #define CH1_H (0x8F)
 
-typedef enum
+typedef enum //error or success enum
 {
 	error=0,
 	success=1
 }error_check;
+
+/***********************
+*i2c_file function
+************************/
 
 uint8_t i2c_file(int32_t fd)
 {
@@ -41,6 +60,10 @@ uint8_t i2c_file(int32_t fd)
 	}
 	return success;
 }
+
+/********************
+* Write operation 
+***********************/
 uint8_t i2c_write(int32_t fd,uint8_t regval)
 {
 	if(write(fd, &regval, sizeof(regval))!=sizeof(regval))
@@ -49,6 +72,10 @@ uint8_t i2c_write(int32_t fd,uint8_t regval)
 	}
 	return success;
 }
+
+/***************************
+* Read operation
+****************************/
 
 uint8_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 {
@@ -59,15 +86,25 @@ uint8_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 	return success;
 
 }
+
+/*************************
+* command register test
+****************************/
+
 uint8_t cmdreg_write_test(int32_t fd)
 {
-	uint8_t comm=START_COMMAND;
+	uint8_t comm=START_COMMAND; //sending stard command = 80
 	if(write(fd, &comm, 1) < 0)
 	{
 		return error;
 	}
 	return success;
 }
+
+/******************************************
+* control register test
+* To write and read the control register
+******************************************/
 
 uint8_t control_reg_test(int32_t fd)
 {
@@ -85,6 +122,11 @@ uint8_t control_reg_test(int32_t fd)
 	return success;
 }
 
+/************************************************
+* identification register test
+* To write and read the identification register
+************************************************/
+
 uint8_t id_reg_test(int32_t fd)
 {
 	uint8_t comm=ID_REGISTER;
@@ -100,6 +142,11 @@ uint8_t id_reg_test(int32_t fd)
 	}
 	return success;
 }
+
+/******************************************
+* timing register test
+* To write and read the timing register
+******************************************/
 
 uint8_t timing_reg_test(int32_t fd)
 {
@@ -117,6 +164,11 @@ uint8_t timing_reg_test(int32_t fd)
 	return success;
 }
 
+/******************************************
+* interrupt control register test
+* To write and read the  interrupt control register
+******************************************/
+
 uint8_t int_control_reg_test(int32_t fd)
 {
 	int32_t check=0;
@@ -132,6 +184,10 @@ uint8_t int_control_reg_test(int32_t fd)
 	}
 	return success;
 }
+/******************************************************
+* interrupt threshold register test
+* To write and read the interrupt threshold register
+*******************************************************/
 
 uint8_t int_threshold_test(int fd)
 {
@@ -172,6 +228,10 @@ uint8_t int_threshold_test(int fd)
 	return success;
 }
 
+/******************************************
+* power off function
+******************************************/
+
 uint8_t poweroff_func(int32_t fd)
 {
 	uint8_t value=3;
@@ -187,6 +247,13 @@ uint8_t poweroff_func(int32_t fd)
 	}
 	return success;	
 }
+
+/******************************************************
+* Get luminosity function
+* Reads data registers (0 and 1)
+* and then lux output is calculated based on formula
+* return the lux value in float
+*********************************************************/
 
 float get_luminosity(int32_t fd)
 {
@@ -263,6 +330,11 @@ float get_luminosity(int32_t fd)
 	return lux_output;
 }
 
+/************************************************
+* test luminosity 
+* To check if luminosity is within certain range
+*************************************************/
+
 uint8_t test_luminosity(int32_t fd)
 {
 	float lux_output;
@@ -293,31 +365,37 @@ int main()
 	{
 		printf("the value of power is %x\n", powerval);
 	}
+	//test luminosity
 	op1=test_luminosity(fd);
 	if(op1==1)
 	{
 		printf("test luminosity successful\n");
 	}
+	//test control reg
 	op2=control_reg_test(fd);
 	if(op2==1)
 	{
 		printf("test control reg successful\n");
 	}
+	//test identification reg
 	op3=id_reg_test(fd);
 	if(op3==1)
 	{
 		printf("test identificarion register successful\n");
 	}
+	//test timing reg
 	op4=timing_reg_test(fd);
 	if(op4==1)
 	{
 		printf("test timing register successful\n");
 	}
+	//test interrupt threshold reg
 	op5=int_threshold_test(fd);
 	if(op5==1)
 	{
 		printf("test threshold successful\n");
 	}
+	//test interrupt control reg
 	op=int_control_reg_test(fd);
 	if(op==1)
 	{

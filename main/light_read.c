@@ -1,9 +1,27 @@
+/******************************************
+* light_read.c
+* Author: Sanika Dongre and Monish Nene
+* Date created: 03/26/19
+*******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
+
 #include "light_read.h"
 
+/*****************************
+* Global variables
+* shared mem and semaphores
+*****************************/
 int32_t shm_light;	
 sem_t* sem_light;
 sem_t* sem_i2c;
 uint8_t* shm_ptr;
+
+/********************
+* Write operation 
+***********************/
 	
 static void i2c_write(int32_t fd,uint8_t regval)
 {
@@ -13,10 +31,21 @@ static void i2c_write(int32_t fd,uint8_t regval)
 	}
 }
 
+/***************************
+* Read operation
+****************************/
+
 static int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 {
 	return read(fd, buffer, size);
 }
+
+/********************************************************
+* Get luminosity function
+* Reads data registers (0 and 1)
+* and then lux output is calculated based on formula
+* return the lux value in float
+*****************************************************/
 
 float get_luminosity()
 {
@@ -83,6 +112,7 @@ float get_luminosity()
 	ch0=(ch0_h<<8)|ch0_l;
 	adcval = (float)ch1/(float)ch0;	
 	printf("ch0=%d,ch1=%d,adcval=%f\n",ch0,ch1,adcval);
+	//check adc range
 	if(adcval>0 && adcval <= 0.5)
 	{
 		lux_output = (0.0304 * ch0) - (0.062 * ch0 * pow(adcval, 1.4));
@@ -105,6 +135,9 @@ float get_luminosity()
 	}	
 	return lux_output;
 }
+/***********************************
+* light_init function
+**************************************/
 
 void light_init(void)
 {
@@ -113,6 +146,12 @@ void light_init(void)
 	sem_i2c = sem_open(i2c_sem_id,0);
 	shm_light = shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
 }
+
+/*******************************************
+* light read function
+* read the lux value 
+* send the shared memory
+*******************************************/
 
 void light_read(void)
 {		

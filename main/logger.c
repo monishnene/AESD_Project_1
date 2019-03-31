@@ -1,4 +1,20 @@
+/******************************************
+* logger.c logger task
+* Author: Monish Nene and Sanika Dongre
+* Date created: 03/25/19
+*******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
+
+
 #include "logger.h"
+
+/*****************************
+* Global variables
+* shared mem and semaphores
+*****************************/
 
 uint8_t* str;
 int32_t n;
@@ -9,6 +25,10 @@ int32_t	shm_light,shm_temp;
 time_t present_time;
 struct tm *time_and_date;
 
+/*******************************************
+* log temperature
+* To log the temperature value to log.txt
+********************************************/
 static void log_temperature (void)
 {	
 	int32_t error=0;
@@ -21,7 +41,8 @@ static void log_temperature (void)
 	sem_post(sem_temp);
 	present_time=(time_t)temp_data.timestamp.tv_sec;
 	time_and_date = localtime(&present_time);
-	sprintf(str,"\nTime & Date : %s(%ld ns), log ID: %d\nTemperature: %d°C, %d°K, %d°F\n",asctime(time_and_date),temp_data.timestamp.tv_nsec,temp_data.log_id,temp_data.data[celcius_id],temp_data.data[kelvin_id],temp_data.data[fahrenheit_id]);
+	//logging in three units Celsius, Farenheit, Kelvin
+	sprintf(str,"\nTime & Date : %s(%ld ns), log ID: %d\nTemperature: %d°C, %d°K,  %d°F\n",asctime(time_and_date),temp_data.timestamp.tv_nsec,temp_data.log_id,temp_data.data[celcius_id],temp_data.data[kelvin_id],temp_data.data[fahrenheit_id]);
 	//printf("Writing to file\n");
 	sem_wait(sem_logfile);
 	FILE* fptr=fopen(logfile,"a");
@@ -30,6 +51,11 @@ static void log_temperature (void)
 	sem_post(sem_logfile);	
 	//printf("...Temperature Logging Done\n");
 }
+
+/*******************************************
+* log luminosity
+* To log the lux value to log.txt
+********************************************/
 
 static void log_luminosity(void)
 {		
@@ -55,6 +81,9 @@ static void log_luminosity(void)
 	//printf("...Luminosity Logging Done\n");
 }
 
+/*************************************
+* logger init function
+**************************************/
 void logger_init(void)
 {
 	FILE* fptr;
@@ -70,13 +99,17 @@ void logger_init(void)
 	//printf("sem_logfile = %d\n",error);
 	sem_wait(sem_logfile);	
 	fptr=fopen(logfile,"w");
-	if(fptr==NULL)
+	if(fptr==NULL)  //error check
 	{
-		printf("File opening error\n");
+		printf("File opening error\n"); 
 	}	
 	fclose(fptr);
 	sem_post(sem_logfile);
 }
+
+/*****************************
+* logger function to log data
+******************************/
 
 void logger(void)
 {	

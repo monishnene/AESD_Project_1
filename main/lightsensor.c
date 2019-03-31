@@ -1,5 +1,19 @@
+/******************************************
+* lightsensor.c
+* Author: Sanika Dongre and Monish Nene
+* Date created: 03/25/19
+*******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
+
 #include "common.h"
 #include <math.h>
+
+/*********************************************
+* Macros
+**********************************************/
 #define ID_VALUE (0x50)
 #define ID_REGISTER (0x8A)
 #define LUX_SLAVE_ADDR (0x39)
@@ -20,17 +34,33 @@
 #define CH1_L (0x8E)
 #define CH1_H (0x8F)
 
-typedef enum
+typedef enum  //To determine day or night time based on lightness or darkness (lux value) 
 {
 	night=0,
 	day=1
 }day_night_time;
 
+/***********************
+*i2c_file function
+************************/
+
 void i2c_file(int32_t fd)
 {
 	fd=open("/dev/i2c-2", O_RDWR);
-	ioctl(fd, I2C_SLAVE, LUX_SLAVE_ADDR);
+	if(fd<0)
+	{
+		perror("file open failed\n");
+	}
+	if(ioctl(fd, I2C_SLAVE, LUX_SLAVE_ADDR)<0)
+	{
+		perror("write has been failed\n");
+	}
 }
+
+
+/********************
+* Write operation 
+***********************/
 
 void i2c_write(int32_t fd,uint8_t regval)
 {
@@ -40,10 +70,21 @@ void i2c_write(int32_t fd,uint8_t regval)
 	}
 }
 
+/***************************
+* Read operation
+****************************/
+
 int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 {
 	return read(fd, buffer, size);
 }
+
+/********************************************************
+* Get luminosity function
+* Reads data registers (0 and 1)
+* and then lux output is calculated based on formula
+* return the lux value in float
+*****************************************************/
 
 float get_luminosity(int32_t fd)
 {
@@ -108,6 +149,7 @@ float get_luminosity(int32_t fd)
 	ch0=(ch0_h<<8)|ch0_l;
 	adcval = (float)ch1/(float)ch0;	
 	printf("ch0=%d,ch1=%d,adcval=%f\n",ch0,ch1,adcval);
+	//adc count value check range
 	if(adcval>0 && adcval <= 0.5)
 	{
 		lux_output = (0.0304 * ch0) - (0.062 * ch0 * pow(adcval, 1.4));
@@ -131,6 +173,11 @@ float get_luminosity(int32_t fd)
 	return lux_output;
 }
 
+/*************************************************
+* day_night function
+* To indicate the level of darkness or brightness
+***************************************************/
+
 uint8_t day_night(int32_t fd)
 {
 	float lux_output = get_luminosity(fd);
@@ -153,11 +200,11 @@ int main()
 	op= day_night(fd);
 	if(op==1)
 	{
-		printf("It is day time\n");
+		printf("It is day time\n"); //day
 	}
 	else
 	{
-		printf("It is night time\n");
+		printf("It is night time\n"); //night
 	}
 	//lux_output = get_luminosity(fd);
 	//printf("The obtained lux value is %f\n", lux_output);

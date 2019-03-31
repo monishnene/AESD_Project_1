@@ -1,3 +1,9 @@
+/***************************************
+* common.h
+* Author: Monish Nene and Sanika Dongre
+* Date created: 03/25/19
+***************************************/
+
 #ifndef COMMON_H
 #define COMMON_H
 #include <errno.h>
@@ -21,15 +27,15 @@
 #include <unistd.h>
 #define STR_SIZE 100
 
-typedef enum
+typedef enum               //enum to turn on/off leds according to the tasks
 {
 	logger_led=0,
 	light_led=1,
 	temperature_led=2,
 	error_led=3,
 }led_t;
-
-typedef enum
+ 
+typedef enum              //enum with id values  assigned according to tasks
 {
 	kelvin_id=0,
 	celcius_id=1,

@@ -3,6 +3,10 @@
 *Author: Sanika Dongre
 *Date created: 03/25/19
 ***********************/
+
+/************************************
+* Includes
+*************************************/
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -13,10 +17,19 @@
 #include <time.h>
 #include "bbgled.h"
 
+/************************************
+* led_init function
+* Function used for initializing LEDs
+*************************************/
 void led_init(void)
 {
 	system(led_init_cmd);
 }
+
+/**************************************
+* LED ON function to turn on the USR LEDs
+* by accessing the gpio pins
+****************************************/
 
 void led_on(uint8_t led)
 {
@@ -35,6 +48,11 @@ void led_on(uint8_t led)
 	return;
 }
 
+/**********************************************
+* LED OFF function to turn off LEDs by accessing 
+* the GPIO pins that can be accessed by user
+************************************************/
+
 void led_off(uint8_t led)
 {
 	if(led<LED_COUNT)
@@ -51,6 +69,11 @@ void led_off(uint8_t led)
 	}
 	return;
 }
+
+/************************************
+* led toggle function to toggle leds 
+* in a pattern
+*************************************/
 
 void led_toggle(uint8_t led)
 {
@@ -71,6 +94,12 @@ void led_toggle(uint8_t led)
 	}
 	return;
 }
+
+/**************************************
+* void main: to toggle leds with 
+* a specific delay
+***************************************/
+
 void main()
 {
 	uint8_t led=0,i=0;

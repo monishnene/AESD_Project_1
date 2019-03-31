@@ -1,3 +1,13 @@
+/******************************************
+* tempsensor.c
+* Author: Sanika Dongre and Monish Nene
+* Date created: 03/25/19
+*******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
+
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -8,6 +18,10 @@
 #include <stdint.h>
 #include <time.h>
 
+/*******************************************
+* Macros
+*******************************************/
+
 #define slave_addr     (0x48)
 #define tempregaddr    (00)
 #define inicond        (0xA060)
@@ -16,8 +30,16 @@
 #define thighregaddr   (03)
 #define highmask       (0x00FF)
 
+/*******************************************
+* Global variables
+*******************************************/
+
 int val;
 int16_t celcius=0,kelvin=0,fahrenheit=0;
+
+/***********************
+*temp_file function
+************************/
 
 int temp_file_func()
 {
@@ -26,6 +48,10 @@ int temp_file_func()
 	ioctl(output, I2C_SLAVE, slave_addr);
 	return output;
 }
+
+/********************
+* Write operation 
+***********************/
 
 void write_func(int temp_fd, uint8_t regval)
 {
@@ -36,27 +62,39 @@ void write_func(int temp_fd, uint8_t regval)
 	}
 }
 
+/***************************
+* configuration reg write
+****************************/
 uint16_t configreg_write_func(int temp_fd, uint16_t regval)
 {
 
 	uint8_t buffer1,buffer2;
 	buffer1 = (inicond|regval)>>8;
 	buffer2 = (inicond|regval);
-	uint8_t buffer[3] = {configregaddr,buffer2,buffer1};	
+	uint8_t buffer[3] = {configregaddr,buffer2,buffer1}; //regaddr and data	
 	write_func(temp_fd, configregaddr);
 	val = write(temp_fd, &buffer, sizeof(buffer));
 	return regval;
 
 }
+
+/***************************
+* configreg read operation
+****************************/
  
 uint16_t configreg_read_func(int temp_fd)
 {
 	
 	uint16_t buffer = 0;
 	write_func(temp_fd, configregaddr);
-	val =  read(temp_fd,&buffer,sizeof(buffer));
+	val =  read(temp_fd,&buffer,sizeof(buffer)); // read data in buffer
 	return buffer;
 }
+
+/***************************
+* thighreg read operation
+****************************/
+
 uint16_t thighreg_read_func(int temp_fd)
 {
 	uint8_t buffer[2] = {0}, valmsb, vallsb;
@@ -65,10 +103,13 @@ uint16_t thighreg_read_func(int temp_fd)
 	val = read(temp_fd,buffer,sizeof(buffer));
 	valmsb = buffer[0];
 	vallsb = buffer[1];
-	high = ((valmsb << 8 ) | vallsb) >> 4;
+	high = ((valmsb << 8 ) | vallsb) >> 4; //output
 	return high;
 }
 
+/***************************
+* thighreg write operation
+****************************/
 uint16_t thighreg_write_func(int temp_fd, uint16_t regval)
 {
 	uint8_t buffer1,buffer2;
@@ -76,19 +117,26 @@ uint16_t thighreg_write_func(int temp_fd, uint16_t regval)
 	buffer2 = (80|regval);
 	uint8_t buffer[3] = {thighregaddr,buffer2,buffer1};
 	write_func(temp_fd, thighregaddr);
-	val = write(temp_fd, &buffer, sizeof(buffer));
+	val = write(temp_fd, &buffer, sizeof(buffer)); //write to buffer
 	return regval;
 }
-	
+
+/***************************
+* tlowreg read operation
+****************************/	
 
 uint16_t tlowreg_read_func(int temp_fd)
 {
 	
 	uint16_t buffer = 0;
 	write_func(temp_fd, tlowregaddr);
-	val =  read(temp_fd,&buffer,sizeof(buffer));
+	val =  read(temp_fd,&buffer,sizeof(buffer)); //buffer contains data
 	return buffer;
 }
+
+/***************************
+* tlowreg write function
+****************************/
 
 uint16_t tlowreg_write_func(int temp_fd, uint16_t regval)
 {
@@ -97,7 +145,7 @@ uint16_t tlowreg_write_func(int temp_fd, uint16_t regval)
 	write_func(temp_fd, regval);
 	buffer1 = (regval)>>8;
 	buffer2 = (regval)& 0x00FF ;
-	uint8_t buffer[3] = {tlowregaddr,buffer1,buffer2};
+	uint8_t buffer[3] = {tlowregaddr,buffer1,buffer2}; //write addr of the reg and data
 	storeval = write(val, &buffer, sizeof(buffer));
 	if(storeval<0)
 	{
@@ -143,7 +191,14 @@ uint16_t config_reg_EM_read_func(int temp_fd)
 	em_read=read(val,&em_read,sizeof(em_read));
 	return em_read;
 }*/
-		
+
+/********************************************************
+* Get temperature function
+* Reads tempreg
+* and obtained temp in celsius is output/16
+* return the temperature value
+*****************************************************/	
+	
 int get_temperature(int temp_fd)
 {
 	int data, h_bit=0;
@@ -152,7 +207,7 @@ int get_temperature(int temp_fd)
 	val = read(temp_fd, &buffer, sizeof(buffer));
 	valmsb = buffer[0];
 	vallsb = buffer[1];
-	data = ((valmsb << 8) | vallsb) >> 4;
+	data = ((valmsb << 8) | vallsb) >> 4; //12 bits resolution
 	if(h_bit!=0)
 	{	
 		return data;
@@ -183,7 +238,7 @@ void main()
 	celcius = get_temperature(temp_fd);
 	fahrenheit=celcius*1.8+32; // celcius to Fahrenheit
 	kelvin=celcius+273.15; // celcius to kelvin
-	printf("\ntemperature value in celcius is %d\n", celcius);
-	printf("\ntemperature value in fahrenheit is %d\n", fahrenheit);
-	printf("\ntemperature value in kelvin is %d\n", kelvin);
+	printf("\ntemperature value in celcius is %d\n", celcius); //temp data in C
+	printf("\ntemperature value in fahrenheit is %d\n", fahrenheit); // temp data in F
+	printf("\ntemperature value in kelvin is %d\n", kelvin); // temp data in K
 }

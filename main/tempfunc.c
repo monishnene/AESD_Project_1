@@ -1,8 +1,12 @@
-/*********************
-*Temperature task
-*Author: Sanika Dongre
-*Date created: 03/25/19
-***********************/
+/******************************************
+* tempfunc.c
+* Author: Sanika Dongre and Monish Nene
+* Date created: 03/25/19
+******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -14,8 +18,17 @@
 #include <linux/i2c-dev.h>
 #include <stdint.h>
 #include <time.h>
+
+/*******************************************
+* Macros
+*******************************************/
+
 #define TEMP_SLAVE_ADDR	(0x48)
 #define TEMP_REG_ADDR	(00)
+
+/********************
+* Write operation 
+***********************/
 
 void i2c_write(int32_t fd,uint8_t regval)
 {
@@ -25,11 +38,21 @@ void i2c_write(int32_t fd,uint8_t regval)
 	}
 }
 
+/***************************
+* Read operation
+****************************/
+
 int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 {
 	return read(fd, buffer, size);
 }
 
+/********************************************************
+* Get temperature function
+* Reads tempreg
+* and obtained temp in celsius is output/16
+* return the temperature value in float
+*****************************************************/
 float get_temperature()
 {
 	float data=0;
@@ -41,7 +64,7 @@ float get_temperature()
 	//sensor tasks
 	i2c_write(temp_fd,TEMP_REG_ADDR);
 	error = i2c_read(temp_fd,buffer,sizeof(buffer));
-	data = (((buffer[0] << 8) | buffer[1]) >> 4)*0.0625;
+	data = (((buffer[0] << 8) | buffer[1]) >> 4)*0.0625; // temp data in C
 	return data;
 }
 

@@ -1,5 +1,19 @@
+/******************************************
+* light_task_registers.c
+* Author: Sanika Dongre and Monish Nene
+* Date created: 03/25/19
+*******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
+
 #include "common.h"
 #include <math.h>
+
+/*********************************************
+* Macros
+**********************************************/
 #define ID_VALUE (0x50)
 #define ID_REGISTER (0x8A)
 #define ID_VAL (0X07)
@@ -24,25 +38,34 @@
 #define CH1_L (0x8E)
 #define CH1_H (0x8F)
 
-typedef enum
+typedef enum  //error or success enum
 {
 	error=0,
 	success=1
 }error_check;
+
+/***********************
+*i2c_file function
+************************/
 
 uint8_t i2c_file(int32_t fd)
 {
 	fd=open("/dev/i2c-2", O_RDWR);
 	if (fd<0)
 	{
-		return error;
+		return error;     //opening error
 	}
 	if(ioctl(fd, I2C_SLAVE, LUX_SLAVE_ADDR)<0)
 	{
-		return error;
+		return error;  //write has been failed
 	}
 	return success;
 }
+
+/********************
+* Write operation 
+***********************/
+
 uint8_t i2c_write(int32_t fd,uint8_t regval)
 {
 	if(write(fd, &regval, sizeof(regval))!=sizeof(regval))
@@ -51,6 +74,10 @@ uint8_t i2c_write(int32_t fd,uint8_t regval)
 	}
 	return success;
 }
+
+/***************************
+* Read operation
+****************************/
 
 uint8_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 {
@@ -61,15 +88,25 @@ uint8_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 	return success;
 
 }
+
+/*************************
+* command register test
+****************************/
+
 uint8_t cmdreg_write_test(int32_t fd)
 {
-	uint8_t comm=START_COMMAND;
+	uint8_t comm=START_COMMAND; //sending stard command = 80
 	if(write(fd, &comm, 1) < 0)
 	{
 		return error;
 	}
 	return success;
 }
+
+/******************************************
+* control register test
+* To write and read the control register
+******************************************/
 
 uint8_t control_reg_test(int32_t fd)
 {
@@ -87,6 +124,11 @@ uint8_t control_reg_test(int32_t fd)
 	return value;
 }
 
+/************************************************
+* identification register test
+* To write and read the identification register
+************************************************/
+
 uint8_t id_reg_test(int32_t fd)
 {
 	uint8_t comm=ID_REGISTER;
@@ -102,6 +144,11 @@ uint8_t id_reg_test(int32_t fd)
 	}
 	return value;
 }
+
+/******************************************
+* timing register test
+* To write and read the timing register
+******************************************/
 
 uint8_t timing_reg_test(int32_t fd)
 {
@@ -119,6 +166,11 @@ uint8_t timing_reg_test(int32_t fd)
 	return value;
 }
 
+/******************************************
+* to set gain timing register test
+* To set gain bit in the timing register
+* gain of 16 times is obtained
+******************************************/
 uint8_t set_gain(int32_t fd)
 {
 	uint8_t value;
@@ -135,6 +187,10 @@ uint8_t set_gain(int32_t fd)
 	return value;
 }
 
+/******************************************
+* Integration time function 
+* To set the integration time in timing reg
+******************************************/
 uint8_t integration_time(int32_t fd)
 {
 	uint8_t value;
@@ -151,6 +207,11 @@ uint8_t integration_time(int32_t fd)
 	return value;
 }
 
+/******************************************
+* interrupt control register test
+* To write and read the  interrupt control register
+******************************************/
+
 uint8_t int_control_reg_test(int32_t fd)
 {
 	int32_t check=0;
@@ -166,6 +227,11 @@ uint8_t int_control_reg_test(int32_t fd)
 	}
 	return value;
 }
+
+/******************************************************
+* interrupt threshold register test
+* To write and read the interrupt threshold register
+*******************************************************/
 
 uint8_t int_threshold_test(int fd)
 {
@@ -206,6 +272,10 @@ uint8_t int_threshold_test(int fd)
 	return success;
 }
 
+/******************************************
+* power off function
+******************************************/
+
 uint8_t poweroff_func(int32_t fd)
 {
 	uint8_t value=3;
@@ -222,6 +292,11 @@ uint8_t poweroff_func(int32_t fd)
 	return success;	
 }
 
+/******************************************
+* channel0 read test
+* To read the data0 register
+******************************************/
+
 uint16_t channel0_read(int32_t fd)
 {
 	uint8_t lsbval;	
@@ -237,6 +312,11 @@ uint16_t channel0_read(int32_t fd)
 	return outval;
 }
 
+/******************************************
+* channel1 register test
+* To read the data1 register
+******************************************/
+
 uint16_t channel1_read(int32_t fd)
 {
 	int value_ob;
@@ -251,6 +331,13 @@ uint16_t channel1_read(int32_t fd)
 	outval = msbval<<8 | lsbval;
 	return outval;
 }
+
+/******************************************************
+* Get luminosity function
+* Reads data registers (0 and 1)
+* and then lux output is calculated based on formula
+* return the lux value in float
+*********************************************************/
 
 float get_luminosity(int32_t fd)
 {
@@ -304,6 +391,7 @@ float get_luminosity(int32_t fd)
 	ch0=(ch0_h<<8)|ch0_l;
 	adcval = (float)ch1/(float)ch0;	
 	printf("ch0=%d,ch1=%d,adcval=%f\n",ch0,ch1,adcval);
+	//adc count val range check
 	if(adcval>0 && adcval <= 0.5)
 	{
 		lux_output = (0.0304 * ch0) - (0.062 * ch0 * pow(adcval, 1.4));
@@ -326,6 +414,11 @@ float get_luminosity(int32_t fd)
 	}	
 	return lux_output;
 }
+
+/************************************************
+* test luminosity 
+* To check if luminosity is within certain range
+*************************************************/
 
 uint8_t test_luminosity(int32_t fd)
 {
@@ -358,41 +451,49 @@ int main()
 	{
 		printf("the value of power is %x\n", powerval);
 	}
+	//test luminosity
 	op=test_luminosity(fd);
 	if(op==1)
 	{
 		printf("test luminosity successfull\n");
 	}
+	//test control reg
 	op=control_reg_test(fd);
 	if(op==9)
 	{
 		printf("test control reg successfull\n");
 	}
+	//test id reg
 	op=id_reg_test(fd);
 	if(op==7)
 	{
 		printf("test identificarion register successfull\n");
 	}
+	// test timing reg
 	op=timing_reg_test(fd);
 	if(op==12)
 	{
 		printf("test timing register successfull\n");
 	}
+	//test interrupt threshold reg
 	op=int_threshold_test(fd);
 	if(op==1)
 	{
 		printf("test threshold successfull\n");
 	}
+	//test interrupt control reg
 	op=int_control_reg_test(fd);
 	if(op==5)
 	{
 		printf("test interrupt control register successfull\n");
 	}
+	//set gain in timing reg
 	op=set_gain(fd);
 	if(op==10)
 	{
 		printf("timing register gain set successfully\n");
 	}
+	//set integration time in timing reg
 	op=integration_time(fd);
 	if(op==3)
 	{

@@ -1,9 +1,28 @@
+/******************************************
+* temperature_read.c
+* Author: Sanika Dongre and Monish Nene
+* Date created: 03/26/19
+*******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
+
 #include "temperature_read.h"
+
+/*****************************
+* Global variables
+* shared mem and semaphores
+*****************************/
 
 int32_t shm_temp;
 sem_t* sem_temp;
 sem_t* sem_i2c;
 uint8_t* shm_ptr;
+
+/********************
+* Write operation 
+***********************/
 
 static void i2c_write(int32_t fd,uint8_t regval)
 {
@@ -13,10 +32,21 @@ static void i2c_write(int32_t fd,uint8_t regval)
 	}
 }
 
+/***************************
+* Read operation
+****************************/
+
 static int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 {
 	return read(fd, buffer, size);
 }
+
+/********************************************************
+* Get temperature function
+* Reads tempreg
+* and obtained temp in celsius is output/16
+* return the temperature value
+*****************************************************/
 
 static int32_t get_temperature(void)
 {
@@ -32,9 +62,13 @@ static int32_t get_temperature(void)
 	i2c_write(fd,TEMP_REG_ADDR);
 	error = i2c_read(fd,buffer,sizeof(buffer));	
 	sem_post(sem_i2c);
-	data = (((buffer[0] << 8) | buffer[1]) >> 4)/16.0;
+	data = (((buffer[0] << 8) | buffer[1]) >> 4)/16.0; // temp data in C
 	return data;
 }
+
+/********************************************************
+* temperature_init function
+*****************************************************/
 
 void temperature_init(void)
 {
@@ -43,6 +77,12 @@ void temperature_init(void)
 	sem_i2c = sem_open(i2c_sem_id,0);
 	shm_temp = shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
 }
+
+/*******************************************
+* temperature read function
+* read the temperature value
+* send the shared memory
+*******************************************/
 
 void temperature_read(void)
 {	

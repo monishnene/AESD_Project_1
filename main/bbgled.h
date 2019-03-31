@@ -1,3 +1,9 @@
+/***************************************
+* bbgled.h
+* Author: Monish Nene and Sanika Dongre
+* Date created: 03/25/19
+***************************************/
+
 #ifndef BBGLED_H
 #define BBGLED_H
 #include "common.h"

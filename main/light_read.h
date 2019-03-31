@@ -1,8 +1,22 @@
+/******************************************
+* light_read.h
+* Author: Sanika Dongre and Monish Nene
+* Date created: 03/26/19
+*******************************************/
+
+/*******************************************
+* Includes
+*******************************************/
+
 #ifndef LIGHT_READ_H
 #define LIGHT_READ_H
 #include "common.h"
 #include "bbgled.h"
 #include <math.h>
+
+/*********************************************
+* Macros
+**********************************************/
 #define ID_VALUE (0x50)
 #define ID_REGISTER (0x8A)
 #define LUX_SLAVE_ADDR (0x39)
