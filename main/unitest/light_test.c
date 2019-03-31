@@ -296,31 +296,31 @@ int main()
 	op1=test_luminosity(fd);
 	if(op1==1)
 	{
-		printf("test luminosity successfull\n");
+		printf("test luminosity successful\n");
 	}
 	op2=control_reg_test(fd);
 	if(op2==1)
 	{
-		printf("test control reg successfull\n");
+		printf("test control reg successful\n");
 	}
 	op3=id_reg_test(fd);
 	if(op3==1)
 	{
-		printf("test identificarion register successfull\n");
+		printf("test identificarion register successful\n");
 	}
 	op4=timing_reg_test(fd);
 	if(op4==1)
 	{
-		printf("test timing register successfull\n");
+		printf("test timing register successful\n");
 	}
 	op5=int_threshold_test(fd);
 	if(op5==1)
 	{
-		printf("test threshold successfull\n");
+		printf("test threshold successful\n");
 	}
 	op=int_control_reg_test(fd);
 	if(op==1)
 	{
-		printf("test interrupt control register successfull\n");
+		printf("test interrupt control register successful\n");
 	}
 }
