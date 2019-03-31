@@ -20,7 +20,6 @@
 #include <time.h>
 #include <unistd.h>
 #define STR_SIZE 100
-#define PORT_ADDRESS 10001
 
 typedef enum
 {

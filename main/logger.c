@@ -72,7 +72,7 @@ void logger_init(void)
 	fptr=fopen(logfile,"w");
 	if(fptr==NULL)
 	{
-		printf("File opening error");
+		printf("File opening error\n");
 	}	
 	fclose(fptr);
 	sem_post(sem_logfile);
@@ -80,14 +80,9 @@ void logger_init(void)
 
 void logger(void)
 {	
-	FILE* fptr;
 	int32_t error=0;
 	//printf("Logging...\n");
 	led_toggle(logger_led);
-	if(fptr==NULL)
-	{
-		printf("File opening error");
-	}
 	log_temperature();
 	bzero(str,STR_SIZE);
 	log_luminosity();	

@@ -4,13 +4,15 @@
 			project.c \
 			lightsensor.c \
 			tempsensor.c \
-			bbgled.c
+			bbgled.c \
+			server.c
 	
 	common_includes =	common.h \
 			 	bbgled.h \
 				light_read.h \
 				temperature_read.h \
-				logger.h 
+				logger.h \
+				server.h 
 				
 
 	common_flags =	-lrt \
@@ -20,7 +22,8 @@
 	common_objects =	bbgled.o \
 				light_read.o \
 				temperature_read.o \
-				logger.o 
+				logger.o \
+				server.o 
 				
 	ip = 10.0.0.152
 

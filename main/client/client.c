@@ -8,12 +8,12 @@
 #include <stdint.h>
 #include <errno.h>
 #include <unistd.h>
-
 #define IP_ADDR "10.0.0.152"
+#define PORT_ADDRESS 10001
 
 int main(void)
 {
-	int sockfd, operation, send_data, received, data, acc_conn;
+	int sockfd, operation, send_data, received, data, acc_conn, data_f;
 	struct sockaddr_in server_addr;
 	struct hostent* hostptr;
 	sockfd=socket(AF_INET,SOCK_STREAM,0);
@@ -24,7 +24,7 @@ int main(void)
 	puts("socket creation successfull\n");
 	memset((char*)&server_addr,0,sizeof(server_addr));
 	server_addr.sin_family=AF_INET;
-	server_addr.sin_port = htons(10001);
+	server_addr.sin_port = htons(PORT_ADDRESS);
 	hostptr=gethostbyname(IP_ADDR);
 	memcpy(&server_addr.sin_addr,hostptr->h_addr,hostptr->h_length);
 	acc_conn = connect(sockfd,(struct  sockaddr*)&server_addr, sizeof(server_addr));
@@ -33,40 +33,24 @@ int main(void)
 		printf("server is not connection ready\n");
 		exit(-1);
 	}
-	while(1)
+	received = read(sockfd,&data,sizeof(data));
+	if(data>-10)
 	{
-		printf("\n Enter the operation to be performed: 1) Get lux 2) Get temp\n");
-		scanf("%d",&operation);
-		send_data= send(sockfd,(void*)&operation,sizeof(operation),0);
-		printf("%d send data\n", send_data);
-		received = read(sockfd,&data,sizeof(data));
-		printf("%d received data from server\n", received);
-		if(received==sizeof(data))
-		{
-			printf("The received data is %d\n", data);
-			if(data!=0)
-			{
-				switch(operation)
-				{
-					case 1:
-					printf("Lux value is %d\n",data);
-					break;
-					
-					case 2:
-					printf("Temperature value is %d\n", data);
-					break;
-					
-					default:
-					printf("The operation is invalid\n");
-					break;
-				}
-			}
-			else
-			{
-				printf("data read from the server is faulty\n");
-			}
-		 }
-		
-	  }
-	  return 0;
+		printf("Light=%d\n",data);
+	}
+	else
+	{
+		printf("LUX Error\n");
+	}
+	received = read(sockfd,&data,sizeof(data));
+	if(data<1e5)
+	{
+		printf("Temperature: %d°C %d°F %d°K\n",data,((data*9)/5)+32,data+273);
+	}		
+	else	
+	{	
+		printf("Temperature Error\n");
+	}
+	close(sockfd);
+	return 0;
 }

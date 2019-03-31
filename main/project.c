@@ -2,7 +2,8 @@
 #include "light_read.h"
 #include "logger.h"
 #include "temperature_read.h"
-#define PERIOD 1
+#include "server.h"
+#define PERIOD 5
 #define DEBUG 1
 #ifndef DEBUG
 #define printf(fmt, ...) (0)
@@ -18,6 +19,7 @@ timer_t timerid;
 struct sigevent signal_event;
 struct itimerspec timer_data;
 struct sigaction signal_action;
+pthread_t thread_light,thread_temperature,thread_logger,thread_server;
 sigset_t mask;
 
 void* temperature_run(void* ptr)
@@ -46,7 +48,15 @@ void* logger_run(void* ptr)
 	pthread_exit(ptr);
 }
 
-int16_t find_temperature (void)
+void* server_run(void* ptr)
+{
+	//printf("server_run\n");
+	remote_server();
+	//printf("Exiting server thread\n");
+	pthread_exit(ptr);
+}
+
+static void find_temperature(void)
 {
 	int32_t error=0;
 	log_t temp_data;
@@ -58,10 +68,10 @@ int16_t find_temperature (void)
 	shmdt(shm_ptr);
 	sem_post(sem_temp);
 	printf("temperature = %d\n",temp_data.data[celcius_id]);
-	return temp_data.data[celcius_id]; 
+	return;
 }
 
-int16_t find_luminosity(void)
+static void find_luminosity(void)
 {
 	int32_t error=0;
 	log_t light_data;
@@ -72,7 +82,7 @@ int16_t find_luminosity(void)
 	shmdt(shm_ptr);
 	sem_post(sem_light);
 	printf("luminosity = %d\n",light_data.data[luminosity_id]);
-	return light_data.data[luminosity_id];
+	return;
 }
 
 void logfile_setup(void)
@@ -94,7 +104,7 @@ void logfile_setup(void)
 	return;
 }
 
-int32_t system_end(void)
+void system_end(int sig)
 {
 	condition=0;
 	sem_unlink(shm_temp_id);	
@@ -143,7 +153,7 @@ int32_t system_init(void)
 {
 	int32_t error=0;
 	condition=1;
-	ptr=&condition;
+	ptr=NULL;
 	printf("System Init\n");
 	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT); 
 	shm_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
@@ -167,7 +177,6 @@ int32_t system_init(void)
 
 int32_t main(int32_t argc, uint8_t **argv)
 {
-	pthread_t thread_light,thread_temperature,thread_logger,thread_socket;
 	int32_t error=0;
 	ptr=&error;
 	if(argc<2)
@@ -178,8 +187,17 @@ int32_t main(int32_t argc, uint8_t **argv)
 	logfile=argv[1];		
 	error=system_init();
 	error=bist();
-	
-	//pthread_create(&thread_,NULL,temperature_read,NULL);
+	error=pthread_create(&thread_server,NULL,server_run,NULL);
+	if(error)
+	{
+		printf("Error Creating Server Thread\n");
+		kill(getpid(),SIGINT);
+	}
+	error=pthread_join(thread_server,NULL);
+	if(error)
+	{	
+		printf("Error Joining Server Thread %d\n",error);
+	}
 	while(condition)
 	{
 		if(trigger)

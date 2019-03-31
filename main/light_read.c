@@ -38,7 +38,7 @@ float get_luminosity()
 	error=i2c_read(fd,&powerval,1);
 	if(powerval==POWER_ON_CMD)
 	{
-		printf("the value of power is %x\n", powerval);
+		//printf("the value of power is %x\n", powerval);
 	}
 	//read channels
 	uint8_t addr = 0x8C;
