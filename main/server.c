@@ -35,7 +35,6 @@ static int16_t find_temperature (void)
 	memcpy(&temp_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_temp);
-	printf("temperature = %d\n",temp_data.data[celcius_id]);
 	return temp_data.data[celcius_id]; 
 }
 
@@ -54,7 +53,6 @@ static int16_t find_luminosity(void)
 	memcpy(&light_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_light);
-	printf("luminosity = %d\n",light_data.data[luminosity_id]);
 	return light_data.data[luminosity_id];
 }
 
@@ -67,6 +65,7 @@ static int16_t find_luminosity(void)
 void remote_server(void)
 {
 	int32_t sockfd=0,conn=0, fork_child=1, serverlen=0, size=0, temp=0, light=0;
+	uint8_t value=0;
 	struct hostent* hostptr;
 	struct sockaddr_in server_addr, client_addr;
 	sockfd = socket(AF_INET, SOCK_STREAM,0);	
@@ -100,23 +99,19 @@ void remote_server(void)
 	{
 		//connection accept
 		conn=accept(sockfd,(struct sockaddr*)&client_addr,&serverlen);
-		if(conn<0)
-		{
-			perror("connection accept failed\n");
-		}
-		else
-		{
-			printf("connection accepted\n");
-		}
-		size=recv(conn,&size,sizeof(size),0);
 		if(!fork()) 
 		{
+			size=recv(conn,&value,sizeof(value),0);
+			if(value=='?')
+			{
+				size=write(conn,&value,sizeof(value));
+				break;
+			}
 			log_creator(LOG_INFO,"Data sent to remote client from server");
 			temp=find_temperature();
 			light=find_luminosity();
 			size=write(conn,&light,sizeof(light)); //send lux value to client
 			size=write(conn,&temp,sizeof(temp)); // send temperature value to client
-			printf("Data sent to client\n");
 			break;
 		}
 	}
@@ -124,3 +119,5 @@ void remote_server(void)
 	close(sockfd);
 	return;
 }
+
+

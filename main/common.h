@@ -28,9 +28,51 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "logger.h"
+#include "light_read.h"
+#include "bbgled.h"
+#include "temperature_read.h"
+#include "server.h"
+//#include "bist.h"
 #define STR_SIZE 200
-#define LOGPORT 8002
-#define PORT_ADDRESS 8003
+#define LOGPORT 8045
+#define PORT_ADDRESS 8046
+#define ID_VALUE (0x50)
+#define ID_REGISTER (0x8A)
+#define ID_VAL (0x07)
+#define LUX_SLAVE_ADDR (0x39)
+#define POWER_ADDR (0x80)
+#define TIMING_REG (0x81)
+#define TIMING_VAL (0x12)
+#define START_COMMAND (0x80)
+#define POWER_ON_CMD (0x3)
+#define CONTROL_VAL (0x09)
+#define TLL (0x82)
+#define TLH (0x83)
+#define THL (0x84)
+#define THH (0x85)
+#define INTERRUPT_REG (0x86)
+#define INTERRUPT_VALUE (0x05)
+#define POWER_OFF_CMD (0x00)
+#define CH0_L (0x8C)
+#define CH0_H (0x8D)
+#define CH1_L (0x8E)
+#define CH1_H (0x8F)
+#define slave_addr     (0x48)
+#define tempregaddr    (00)
+#define inicond        (0xA060)
+#define configregaddr  (0x01)
+#define tlowregaddr    (0x02)
+#define thighregaddr   (0x03)
+#define highmask       (0x00FF)
+#define TOTAL_HEARTS 4
+
+typedef enum
+{
+	logger_heart=0,	
+	server_heart=1,
+	temperature_heart=2,
+	light_heart=3,
+}heart_t;
 
 typedef enum
 {
@@ -70,6 +112,8 @@ typedef struct
 #define LOG_SIZE sizeof(log_t)
 
 uint8_t* logfile;
+static uint8_t heartbeat_check[TOTAL_HEARTS]={0,0,0,0};
+static uint8_t* thread_names[]={"Logger","Server","Temperature","Light"};
 static uint8_t* logtype[]={"LOG_INFO","LOG_DATA","LOG_ERROR"};
 static uint8_t condition=1;
 static uint8_t logger_ready_id[]="check if logger is ready";

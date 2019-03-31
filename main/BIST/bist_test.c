@@ -177,11 +177,11 @@ int main()
 	error=i2c_read(fd,&readop,1);
 	if(readop==81)
 	{
-		printf("The I2C works - BIST Successfull\n");
+		printf("The I2C works for light - BIST Successfull\n");
 	}
 	else
 	{
-		perror("The I2C fails - BIST is not successfull\n");
+		perror("The I2C fails for light- BIST is not successfull\n");
 	}
 	//temp sensor
 	op=i2c_file(fd); //i2c file
@@ -193,6 +193,16 @@ int main()
 	else
 	{
 		perror("The temp sensor is not connected thus I/O error\n");
+	}	
+	op1=i2c_write(fd,configregaddr);
+	error=i2c_read(fd,&readop,1);
+	if(readop==81)
+	{
+		printf("The I2C works for temp - BIST Successfull\n");
+	}
+	else
+	{
+		perror("The I2C fails for temp - BIST is not successfull\n");
 	}
 	
 }
