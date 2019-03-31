@@ -70,7 +70,7 @@ void log_creator(uint8_t logid, uint8_t* str)
 	pid_t thread_id=syscall(SYS_gettid);
 	struct timespec timestamp;
 	clock_gettime(CLOCK_REALTIME,&timestamp);
-	sprintf(msg,"[PID:%d][TID:%d][%d.%dsec] %s-> %s\n",process_id,thread_id,timestamp.tv_sec,timestamp.tv_nsec,logtype[logid],str);
+	sprintf(msg,"[PID:%d][TID:%d][%d.%d sec] %s-> %s\n",process_id,thread_id,timestamp.tv_sec,timestamp.tv_nsec,logtype[logid],str);
 	sock = socket(AF_INET, SOCK_STREAM, 0);
         error = connect(sock, (struct sockaddr *)&sock_struct_client, sizeof(sock_struct_client));
 	error = write(sock,msg,strlen(msg));	
@@ -98,6 +98,11 @@ void logger(void)
 		{
 			led_toggle(logger_led);
 			size=read(sock,msg,STR_SIZE); //receive data from log creator
+			if(*(msg)=='?')
+			{
+				size=write(sock,msg,1);
+				break;
+			}
 			sem_wait(sem_logfile);	
 			fptr=fopen(logfile,"a");
 			n=fwrite(msg,1,size,fptr);

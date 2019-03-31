@@ -19,7 +19,7 @@
 * Macros
 *******************************************/
 
-#define PERIOD 5
+#define PERIOD 1
 #define DEBUG 1
 #ifndef DEBUG
 #define printf(fmt, ...) (0)
@@ -51,9 +51,9 @@ sigset_t mask;
 * runs the temperature task
 * and exits the thread
 ********************************/
-
 void* temperature_run(void* ptr)
 {
+	heartbeat_check[temperature_heart]=1;
 	temperature_read();
 	pthread_exit(ptr);
 }
@@ -63,9 +63,9 @@ void* temperature_run(void* ptr)
 * runs the light task
 * and exits the thread
 ********************************/
-
 void* light_run(void* ptr)
 {
+	heartbeat_check[light_heart]=1;
 	light_read();
 	pthread_exit(ptr);
 }
@@ -75,7 +75,6 @@ void* light_run(void* ptr)
 * runs the logger task
 * and exits the thread
 ********************************/
-
 void* logger_run(void* ptr)
 {
 	logger();
@@ -87,49 +86,10 @@ void* logger_run(void* ptr)
 * runs the socket server task
 * and exits the thread
 ***************************************/
-
 void* server_run(void* ptr)
-{
+{	
 	remote_server();
-	pthread_exit(ptr);
-}
-
-/*****************************
-* find temperature function
-* celsius value is printed
-********************************/
-
-static void find_temperature(void)
-{
-	int32_t error=0;
-	log_t temp_data;
-	//join thread  here temperature
-      	sem_wait(sem_temp);
-	shm_ptr=shmat(shm_temp,(void*)0,0);
-	//printf("Shared Memory Access\n");
-	memcpy(&temp_data,shm_ptr,LOG_SIZE);
-	shmdt(shm_ptr);
-	sem_post(sem_temp);
-	printf("temperature = %d\n",temp_data.data[celcius_id]);
-	return;
-}
-
-/*****************************
-* find luminosity function
-* lux value is printed
-********************************/
-static void find_luminosity(void)
-{
-	int32_t error=0;
-	log_t light_data;
-	//join thread  here light
-      	sem_wait(sem_light);
-	shm_ptr=shmat(shm_light,(void*)0,0);
-	memcpy(&light_data,shm_ptr,LOG_SIZE);
-	shmdt(shm_ptr);
-	sem_post(sem_light);
-	printf("luminosity = %d\n",light_data.data[luminosity_id]);
-	return;
+	pthread_exit(ptr);	
 }
 
 /*****************************
@@ -159,7 +119,6 @@ void logfile_setup(void)
 * unlinks the linked memories for
 * different tasks
 ********************************/
-
 void system_end(int sig)
 {
 	condition=0;
@@ -172,22 +131,57 @@ void system_end(int sig)
 	sem_unlink(logger_ready_id);
 }
 
-/*****************************
-* bist function
-* to perform built in startuo
-********************************/
-
-int32_t bist(void)
-{
-	int32_t error=0;
-	find_temperature();
-	find_luminosity();
-	return error;
-}
-
 /*************************************
 * join threads based on trigger value
 ***************************************/
+void heartbeat(void)
+{
+	uint8_t i=0,count=0,dummy='?',reply=0;
+	int32_t socket_desc=0,query=0,error=0;
+	struct sockaddr_in sock_heartbeat;
+	sock_heartbeat.sin_addr.s_addr = INADDR_ANY;
+        sock_heartbeat.sin_family = AF_INET;
+	sock_heartbeat.sin_port = htons(LOGPORT);	
+	query = socket(AF_INET, SOCK_STREAM, 0);
+        error = connect(query, (struct sockaddr *)&sock_heartbeat, sizeof(sock_heartbeat));
+	error = write(query,&dummy,sizeof(dummy));
+	error = read(query,&reply,sizeof(reply));
+	if(dummy==reply)
+	{
+		heartbeat_check[logger_heart]=1;
+	}	
+	close(query);	
+	reply=0;	
+	sock_heartbeat.sin_port = htons(PORT_ADDRESS);	
+	query = socket(AF_INET, SOCK_STREAM, 0);
+        error = connect(query, (struct sockaddr *)&sock_heartbeat, sizeof(sock_heartbeat));
+	error = write(query,&dummy,sizeof(dummy));
+	error = read(query,&reply,sizeof(reply));
+	if(dummy==reply)
+	{
+		heartbeat_check[server_heart]=1;
+	}	
+	close(query);
+	for(i=0;i<TOTAL_HEARTS;i++)
+	{
+		if(!heartbeat_check[i])
+		{
+			sprintf(msg,"%s thread is dead",thread_names[i]);
+			log_creator(LOG_ERROR,msg);
+			bzero(msg,STR_SIZE);
+		}
+		count+=heartbeat_check[i];
+	}
+	if(count==TOTAL_HEARTS)
+	{
+		log_creator(LOG_INFO,"All threads are alive");
+	}
+	for(i=0;i<TOTAL_HEARTS;i++)
+	{
+		heartbeat_check[i]=0;
+	}
+}
+
 
 static void join_threads(int sig, siginfo_t *si, void *uc)
 {
@@ -217,6 +211,7 @@ static void join_threads(int sig, siginfo_t *si, void *uc)
 		log_creator(LOG_ERROR,msg);
 		bzero(msg,STR_SIZE);
 	}
+	heartbeat();
 }
 
 /*************************
