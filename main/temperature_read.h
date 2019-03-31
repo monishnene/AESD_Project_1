@@ -5,7 +5,7 @@
 #define TEMP_SLAVE_ADDR	(0x48)
 #define TEMP_REG_ADDR	(00)
 
-void* temperature_read(void* ptr);
+void temperature_read(void);
 void temperature_init(void);
 
 #endif

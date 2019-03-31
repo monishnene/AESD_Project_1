@@ -20,6 +20,7 @@
 #include <time.h>
 #include <unistd.h>
 #define STR_SIZE 100
+#define PORT_ADDRESS 10001
 
 typedef enum
 {
@@ -53,6 +54,7 @@ typedef struct
 #define LOG_SIZE sizeof(log_t)
 
 uint8_t* logfile;
+static uint8_t condition;
 static uint8_t i2c_sem_id[]="sem_i2c";
 static uint8_t logfile_sem_id[]="sem_logfile";
 static uint8_t shm_temp_id[]="temperature";

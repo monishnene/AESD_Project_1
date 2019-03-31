@@ -2,55 +2,77 @@
 #include "light_read.h"
 #include "logger.h"
 #include "temperature_read.h"
-#define PERIOD 5
+#define PERIOD 1
 #define DEBUG 1
 #ifndef DEBUG
 #define printf(fmt, ...) (0)
 #endif
 int32_t shm_temp=0,shm_light=0;
+uint8_t trigger=1;
 uint8_t* shm_ptr;
 void* ptr;
 sem_t* sem_temp;
 sem_t* sem_light;
 int32_t celcius=0,fahrenheit=0,kelvin=0,luminosity=0;
-pthread_t thread_light,thread_temperature,thread_logger,thread_socket;
 timer_t timerid;
 struct sigevent signal_event;
 struct itimerspec timer_data;
 struct sigaction signal_action;
 sigset_t mask;
 
-static void find_temperature (void)
+void* temperature_run(void* ptr)
+{
+	//printf("Temperature run\n");
+	temperature_read();
+	//printf("Exiting temperature thread\n");
+	pthread_exit(ptr);
+}
+
+
+void* light_run(void* ptr)
+{
+	//printf("Light run\n");
+	light_read();
+	//printf("Exiting light thread\n");
+	pthread_exit(ptr);
+}
+
+
+void* logger_run(void* ptr)
+{
+	//printf("logger_run\n");
+	logger();
+	//printf("Exiting log thread\n");
+	pthread_exit(ptr);
+}
+
+int16_t find_temperature (void)
 {
 	int32_t error=0;
 	log_t temp_data;
 	//join thread  here temperature
-	pthread_join(thread_temperature,ptr);
-      	//sem_getvalue(sem_temp,&error);
-	//printf("sem_temp = %d\n",error);
-	sem_wait(sem_temp);
+      	sem_wait(sem_temp);
 	shm_ptr=shmat(shm_temp,(void*)0,0);
-	printf("Shared Memory Access\n");
+	//printf("Shared Memory Access\n");
 	memcpy(&temp_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_temp);
 	printf("temperature = %d\n",temp_data.data[celcius_id]);
+	return temp_data.data[celcius_id]; 
 }
 
-static void find_luminosity(void)
+int16_t find_luminosity(void)
 {
 	int32_t error=0;
 	log_t light_data;
 	//join thread  here light
-	pthread_join(thread_light,ptr);
-      	//sem_getvalue(sem_light,&error);
-	//printf("sem_light = %d\n",error);
-	sem_wait(sem_light);
+      	sem_wait(sem_light);
 	shm_ptr=shmat(shm_light,(void*)0,0);
 	memcpy(&light_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_light);
 	printf("luminosity = %d\n",light_data.data[luminosity_id]);
+	return light_data.data[luminosity_id];
 }
 
 void logfile_setup(void)
@@ -74,12 +96,12 @@ void logfile_setup(void)
 
 int32_t system_end(void)
 {
+	condition=0;
 	sem_unlink(shm_temp_id);	
     	sem_unlink(shm_light_id);
 	sem_unlink(led_sem_id);
 	sem_unlink(logfile_sem_id);
 	sem_unlink(i2c_sem_id);
-	exit(0);
 }
 
 int32_t bist(void)
@@ -92,10 +114,7 @@ int32_t bist(void)
 
 static void join_threads(int sig, siginfo_t *si, void *uc)
 {
-	printf("Joining Threads\n");
-	pthread_join(thread_temperature,&ptr);
-	pthread_join(thread_light,&ptr);
-	pthread_join(thread_logger,&ptr);
+	trigger=1;
 }
 
 int32_t timer_init(void)
@@ -122,7 +141,9 @@ int32_t timer_init(void)
 
 int32_t system_init(void)
 {
-	int32_t error=0;	
+	int32_t error=0;
+	condition=1;
+	ptr=&condition;
 	printf("System Init\n");
 	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT); 
 	shm_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
@@ -140,17 +161,13 @@ int32_t system_init(void)
 	//signal(SIGUSR1,kill_first_thread);
 	//signal(SIGUSR2,break_condition);
 	signal(SIGINT,system_end);
-	//pthread creation
-	error = pthread_create(&thread_temperature,NULL,temperature_read,NULL);
-	error = pthread_create(&thread_light,NULL,light_read,NULL);
-	error = pthread_create(&thread_logger,NULL,logger,NULL);
-	//pthread_create(&thread_,NULL,temperature_read,NULL);
 	error=timer_init();
 	printf("System Init Done\n");
 }
 
 int32_t main(int32_t argc, uint8_t **argv)
 {
+	pthread_t thread_light,thread_temperature,thread_logger,thread_socket;
 	int32_t error=0;
 	ptr=&error;
 	if(argc<2)
@@ -161,6 +178,48 @@ int32_t main(int32_t argc, uint8_t **argv)
 	logfile=argv[1];		
 	error=system_init();
 	error=bist();
-	while(1);
-	system_end();
+	
+	//pthread_create(&thread_,NULL,temperature_read,NULL);
+	while(condition)
+	{
+		if(trigger)
+		{
+			//pthread creation
+			error = pthread_create(&thread_temperature,NULL,temperature_run,NULL);
+			if(error)
+			{
+				printf("Error Creating Temperature Thread\n");
+				kill(getpid(),SIGINT);
+			}
+			error = pthread_create(&thread_light,NULL,light_run,NULL);
+			if(error)
+			{
+				printf("Error Creating Light Thread\n");
+				kill(getpid(),SIGINT);
+			}
+			error = pthread_create(&thread_logger,NULL,logger_run,NULL);
+			if(error)
+			{
+				printf("Error Creating Logger Thread\n");
+				kill(getpid(),SIGINT);
+			}
+			printf("Joining Threads\n");
+			error=pthread_join(thread_temperature,NULL);
+			if(error)
+			{
+				printf("Error Joining Temperature Thread %d\n",error);
+			}
+			error=pthread_join(thread_light,NULL);
+			if(error)
+			{
+				printf("Error Joining light Thread %d\n",error);
+			}
+			error=pthread_join(thread_logger,NULL);
+			if(error)
+			{
+				printf("Error Joining logger Thread %d\n",error);
+			}
+			trigger=0;
+		}
+	}
 }

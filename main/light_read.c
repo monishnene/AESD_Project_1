@@ -78,11 +78,11 @@ float get_luminosity()
 		perror("error in read ch1h\n");
 	}	
 	sem_post(sem_i2c);
-	printf("ch0l=%d,ch1l=%d, ch0h=%d, ch1h=%d\n",ch0_l,ch1_l, ch0_l,ch0_h);
+	//printf("ch0l=%d,ch1l=%d, ch0h=%d, ch1h=%d\n",ch0_l,ch1_l, ch0_l,ch0_h);
 	ch1=(ch1_h<<8)|ch1_l;
 	ch0=(ch0_h<<8)|ch0_l;
 	adcval = (float)ch1/(float)ch0;	
-	printf("ch0=%d,ch1=%d,adcval=%f\n",ch0,ch1,adcval);
+	//printf("ch0=%d,ch1=%d,adcval=%f\n",ch0,ch1,adcval);
 	if(adcval>0 && adcval <= 0.5)
 	{
 		lux_output = (0.0304 * ch0) - (0.062 * ch0 * pow(adcval, 1.4));
@@ -108,16 +108,16 @@ float get_luminosity()
 
 void light_init(void)
 {
-	printf("Light Init\n");
+	//printf("Light Init\n");
 	sem_light = sem_open(shm_light_id,0);
 	sem_i2c = sem_open(i2c_sem_id,0);
 	shm_light = shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
 }
 
-void* light_read(void* ptr)
+void light_read(void)
 {		
 	int32_t error=0;
-	printf("Light Read\n");
+	//printf("Light Read\n");
 	led_toggle(light_led);
 	//declare variables
 	log_t log_data;	
@@ -127,14 +127,12 @@ void* light_read(void* ptr)
 	log_data.header=light_id;
 	log_data.log_id=rand();
 	//shared memory send
-      	//sem_getvalue(sem_light,&error);
-	//printf("sem_light = %d\n",error);
 	sem_wait(sem_light);
 	shm_ptr=shmat(shm_light,(void*)0,0);	
 	memcpy(shm_ptr,&log_data,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_light);
-	printf("Light Read Done\n");
-	return ptr;
+	//printf("Light Read Done\n");
+	return;
 }
 

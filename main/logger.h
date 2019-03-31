@@ -4,6 +4,6 @@
 #include "bbgled.h"
 
 void logger_init(void);
-void* logger(void* ptr);
+void logger(void);
 
 #endif

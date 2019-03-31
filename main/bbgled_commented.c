@@ -6,14 +6,22 @@
 #include "bbgled.h"
 
 sem_t* sem_led;
-
+/*****************
+*led_init function
+* Function used for
+* initializing LEDs
+*********************/
 void led_init(void)
 {	
 	printf("LED Init\n");
 	sem_led = sem_open(led_sem_id,0);
 	system(led_init_cmd);
 }
-
+/***********************
+*LED ON function
+* To turn on the USR LEDs
+* by accessing the gpio pins
+***********************/
 void led_on(uint8_t led)
 {
 	sem_wait(sem_led);
@@ -32,6 +40,12 @@ void led_on(uint8_t led)
 	sem_post(sem_led);
 	return;
 }
+/******************
+*LED OFF function
+* to turn off LEDs by accessing
+* the GPIO pins that 
+* can be accessed by user
+***********************/
 
 void led_off(uint8_t led)
 {
@@ -51,11 +65,15 @@ void led_off(uint8_t led)
 	sem_post(sem_led);
 	return;
 }
+/********************
+*led toggle function
+* to toggle leds in a pattern
+***********************/
 
 void led_toggle(uint8_t led)
 {
 	FILE* fptr;
-	//printf("LED%d Toggle\n",led);
+	printf("LED%d Toggle\n",led);
 	sem_wait(sem_led);
 	if(led<LED_COUNT)
 	{
@@ -76,10 +94,14 @@ void led_toggle(uint8_t led)
 		printf("LED index error\n");
 	}
 	sem_post(sem_led);
-	//printf("LED%d Toggle Done\n",led);
+	printf("LED%d Toggle Done\n",led);
 }
 
 #ifdef LED_TEST
+/*******************
+* void main: to toggle leds
+* with a specific delay
+********************/
 void main()
 {
 	uint8_t led=0,i=0;

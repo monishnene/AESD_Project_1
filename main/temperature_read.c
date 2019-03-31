@@ -20,7 +20,7 @@ static int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 
 static int32_t get_temperature(void)
 {
-	printf("Temperature Get\n");
+	//printf("Temperature Get\n");
 	int32_t data=0;
 	int32_t error=0,fd=0;
 	uint8_t buffer[2];
@@ -38,15 +38,15 @@ static int32_t get_temperature(void)
 
 void temperature_init(void)
 {
-	printf("Temperature Init\n");
+	//printf("Temperature Init\n");
 	sem_temp = sem_open(shm_temp_id,0);
 	sem_i2c = sem_open(i2c_sem_id,0);
 	shm_temp = shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
 }
 
-void* temperature_read(void* ptr)
+void temperature_read(void)
 {	
-	printf("Temperature Read\n");
+	//printf("Temperature Read\n");
 	led_toggle(temperature_led);
 	//declare variables
 	log_t log_data;	
@@ -60,14 +60,12 @@ void* temperature_read(void* ptr)
 	log_data.data[kelvin_id]=celcius+273.15; // celcius to kelvin
 	log_data.log_id=rand();
 	//shared memory send
-      	//sem_getvalue(sem_temp,&error);
-	//printf("sem_temp = %d\n",error);
 	sem_wait(sem_temp);
 	shm_ptr=shmat(shm_temp,(void*)0,0);
 	memcpy(shm_ptr,&log_data,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_temp);
-	printf("Temperature Read Done\n");
-	return ptr;
+	//printf("Temperature Read Done\n");
+	return;
 }
 
