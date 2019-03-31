@@ -61,17 +61,8 @@ int main(void)
 		fork_child=fork(); //fork
 		if(fork_child==0)
 		{
-			received=read(conn,&input,sizeof(input)); //receive input
-			printf("%d received data from client\n", received);
-			if(received==sizeof(input))
-			{
-				printf("The data received by server from client is %d\n",input);
-				if(input==2)
-				{
-					send_data=send(conn,(void*)&temp,sizeof(temp),0); //send temp data to client
-					printf("%d data sent to client\n", send_data);
-				}
-			}
+			send_data=send(conn,(void*)&temp,sizeof(temp),0); //send temp data to client
+			printf("%d data sent to client\n", send_data);
 		}
 	}
 	//close socket

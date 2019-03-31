@@ -24,173 +24,217 @@
 
 #define slave_addr     (0x48)
 #define tempregaddr    (00)
-#define inicond        (0xA060)
+#define inicond        (0x60A0)
 #define configregaddr  (0x01)
 #define tlowregaddr    (0x02)
-#define thighregaddr   (03)
+#define thighregaddr   (0x03)
 #define highmask       (0x00FF)
+#define interr         (0x62a0)
+#define shutdown       (0x61a0)
 
 /*******************************************
 * Global variables
 *******************************************/
-
 int val;
 int16_t celcius=0,kelvin=0,fahrenheit=0;
+
+
+typedef enum  //error or success enum
+{
+	error=0,
+	success=1
+}error_check;
+
 
 /***********************
 *temp_file function
 ************************/
 
-int temp_file_func()
+uint8_t temp_file_func()
 {
 	int output;
 	output= open("/dev/i2c-2", O_RDWR);
-	ioctl(output, I2C_SLAVE, slave_addr);
-	return output;
+	if(output<0)
+	{	
+		perror("file open failed\n");
+		return error;
+	}
+	if(ioctl(output, I2C_SLAVE, slave_addr)<0)
+	{
+		return error;
+	}
+	return success;
 }
 
 /********************
 * Write operation 
 ***********************/
-
-void write_func(int temp_fd, uint8_t regval)
+uint8_t i2c_write(int32_t temp_fd,uint8_t regval)
 {
-	val= write(temp_fd, &regval, sizeof(regval));
-	if(val<0)
+	if(write(temp_fd, &regval, sizeof(regval))!=sizeof(regval))
 	{
-		perror("write function has been failed");
+		return error;
 	}
+	return success;
 }
 
+uint8_t i2c_readword(int32_t temp_fd,uint8_t* buff)
+{
+	if(read(temp_fd, buff, 2)!=2)
+	{
+		return error;
+	}
+	return success;
+
+}
+
+uint8_t i2c_writeword(int32_t temp_fd, uint8_t* buff)
+{
+	if(write(temp_fd,buff, 3)!=3)
+    	{
+    		perror("write word failed\n");
+        	return error; 
+	}
+	return SUCCESS;
+}
+
+uint16_t pointerreg(int temp_fd, uint16_t regval)
+{
+	uint8_t* buffer=malloc(sizeof(uint8_t)*2);
+	uint8_t buffer1= 0x60;
+	uint8_t buffer2 = 0xa0;
+	uint8_t addr = configregaddr;
+	if(regval==1)
+	{
+		perror("The tempreg is read only register\n");
+	}
+	if(regval==2)
+	{
+		uint8_t addr1= configregaddr;
+		register_read(temp_fd,addr1);
+	}
+	if(regval==3)
+	{
+		uint8_t addr1= tlowregaddr;
+		register_read(temp_fd,addr1);
+	}
+	if(regval==4)
+	{
+		uint8_t addr1=thighregaddr;
+		//i2c_write(temp_fd,thighregaddr);
+	}
+	return success;
+}	
+
+float resolution_set_func(int temp_fd, int data_in)
+{
+	float data_resolution=0;
+	pointerreg(temp_fd,2);
+	uint8_t* buffer=malloc(sizeof(uint8_t)*2);
+	if(data_in==1)
+	{
+		data_resolution = 0.0625;
+
+	}
+	if(data_in==2)
+	{
+		data_resolution=0.5;
+	}
+	printf("resolution set is %f\n",data_resolution);
+	return data_resolution;
+}
+
+uint16_t* register_read(int temp_fd, uint8_t regval)
+{
+	uint8_t* buffer=malloc(sizeof(uint8_t)*2);
+	write(temp_fd,&regval,sizeof(regval));
+	i2c_readword(temp_fd,buffer);
+	printf("1st data is %x\n", buffer[0]);
+	printf("2nd data is %x\n", buffer[1]);
+	return (buffer);
+}
+
+void register_write(int temp_fd, uint8_t regval, uint16_t* ptr)
+{
+	uint8_t* buffer=malloc(sizeof(uint8_t)*3);
+	buffer[0]=regval;
+	*((uint16_t*)&buffer[1])=*ptr;
+	i2c_writeword(&buffer[0],temp_fd);
+	free(buffer);
+}
+		
 /***************************
 * configuration reg write
 ****************************/
-uint16_t configreg_write_func(int temp_fd, uint16_t regval)
+uint16_t configreg_test(int temp_fd)
 {
-
-	uint8_t buffer1,buffer2;
-	buffer1 = (inicond|regval)>>8;
-	buffer2 = (inicond|regval);
-	uint8_t buffer[3] = {configregaddr,buffer2,buffer1}; //regaddr and data	
-	write_func(temp_fd, configregaddr);
-	val = write(temp_fd, &buffer, sizeof(buffer));
-	return regval;
-
-}
-
-/***************************
-* configreg read operation
-****************************/
- 
-uint16_t configreg_read_func(int temp_fd)
-{
-	
-	uint16_t buffer = 0;
-	write_func(temp_fd, configregaddr);
-	val =  read(temp_fd,&buffer,sizeof(buffer)); // read data in buffer
-	return buffer;
-}
-
-/***************************
-* thighreg read operation
-****************************/
-
-uint16_t thighreg_read_func(int temp_fd)
-{
-	uint8_t buffer[2] = {0}, valmsb, vallsb;
-	uint16_t high;
-	write_func(temp_fd, thighregaddr);
-	val = read(temp_fd,buffer,sizeof(buffer));
-	valmsb = buffer[0];
-	vallsb = buffer[1];
-	high = ((valmsb << 8 ) | vallsb) >> 4; //output
-	return high;
-}
-
-/***************************
-* thighreg write operation
-****************************/
-uint16_t thighreg_write_func(int temp_fd, uint16_t regval)
-{
-	uint8_t buffer1,buffer2;
-	buffer1 = (80|regval)>>8;
-	buffer2 = (80|regval);
-	uint8_t buffer[3] = {thighregaddr,buffer2,buffer1};
-	write_func(temp_fd, thighregaddr);
-	val = write(temp_fd, &buffer, sizeof(buffer)); //write to buffer
-	return regval;
-}
-
-/***************************
-* tlowreg read operation
-****************************/	
-
-uint16_t tlowreg_read_func(int temp_fd)
-{
-	
-	uint16_t buffer = 0;
-	write_func(temp_fd, tlowregaddr);
-	val =  read(temp_fd,&buffer,sizeof(buffer)); //buffer contains data
-	return buffer;
-}
-
-/***************************
-* tlowreg write function
-****************************/
-
-uint16_t tlowreg_write_func(int temp_fd, uint16_t regval)
-{
-	int storeval;
-	uint8_t buffer1,buffer2;
-	write_func(temp_fd, regval);
-	buffer1 = (regval)>>8;
-	buffer2 = (regval)& 0x00FF ;
-	uint8_t buffer[3] = {tlowregaddr,buffer1,buffer2}; //write addr of the reg and data
-	storeval = write(val, &buffer, sizeof(buffer));
-	if(storeval<0)
+	uint8_t addr = configregaddr;
+	uint16_t* output;
+	uint16_t data_config = inicond;
+	register_write(temp_fd,addr,&data_config);
+	output=register_read(temp_fd,addr);
+	if(*output==60a0)
 	{
-		return -1;
+		return success;
 	}
-	return 0;
+	return error;
 }
 
-/*int config_reg_fault_bits(int temp_fd, uint16_t regval)
+uint16_t configreg_interruptmode(int temp_fd)
 {
-	int faultbitsval;	
-	write_func(temp_fd,regval);	
-	uint8_t buffer[2]={configregaddr,regval};
-	faultbitsval = write(val, &buffer, sizeof(buffer));
-	return 0;
+	uint8_t addr = configregaddr;
+	uint16_t* output;
+	uint16_t data_config = inicond|interr;
+	register_write(temp_fd,configregaddr,&data_config);
+	output=register_read(temp_fd,addr);
+	if(*output==62a0)
+	{
+		return success;
+	}
+	return error;
 }
 
-uint16_t config_reg_fault_bits_read_func(int temp_fd)
+uint16_t configreg_shutdown(int temp_fd)
 {
-	int optval;		
-	uint8_t buffer[1]={0};	
-	uint16_t op_fault=0;
-	write_func(temp_fd,regval);
-	optval = read(val, &op_fault,sizeof(op_fault));
-	return faultbitsval;
-}
-	
-int config_reg_EM_func(int temp_fd, uint16_t regval)
-{
-	int optval;	
-	write_func(temp_fd,regval);
-	uint8_t buffer[2] = {controlregaddr,regval};
-	optval=write(val, &buffer, sizeof(buffer));
-	return 0;
+	uint8_t addr = configregaddr;
+	uint16_t* output;
+	uint16_t data_config = inicond|shutdown;
+	register_write(temp_fd,addr,&data_config);
+	output=register_read(temp_fd,addr);
+	if(*output==61a0)
+	{
+		return success;
+	}
+	return error;
 }
 
-uint16_t config_reg_EM_read_func(int temp_fd)
+uint16_t tlowreg_write(int temp_fd)
 {
-	int d_read;	
-	uint8_t buffer[1]={0};
-	uint16_t em_read=0;
-	write_func(temp_fd,regval);
-	em_read=read(val,&em_read,sizeof(em_read));
-	return em_read;
-}*/
+	uint8_t addr = tlowregaddr;
+	uint16_t opt = 72;
+	uint16_t* output;
+	register_write(temp_fd,addr,&opt);
+	output= register_read(temp_fd,tlowregaddr);
+	if(*output==72)
+	{
+		return success;
+	}
+	return error;
+}
+
+uint16_t thighreg_write(int temp_fd)
+{
+	uint8_t addr = thighregaddr;
+	uint16_t opt=88;
+	uint16_t* output;
+	register_write(temp_fd,addr,&opt);
+	output= register_read(temp_fd,addr);
+	if(*output==88)
+	{
+		return success;
+	}
+	return error;
+}
 
 /********************************************************
 * Get temperature function
@@ -220,21 +264,60 @@ int get_temperature(int temp_fd)
 }
 void main()
 {
-	uint16_t regval, buffer;
+	uint16_t regval, buffer, op;
+	uint16_t tester, tester1, tester2, tester3, tester4;
 	int temp_fd;
-	temp_fd = temp_file_func();
-	regval = 11;
-	regval = configreg_write_func(temp_fd, regval);
-	buffer= configreg_read_func(temp_fd);
-	printf("The config register value is %d\n", buffer);
-	regval = 10;
-	thighreg_write_func(temp_fd, regval);
-	buffer = thighreg_read_func(temp_fd);
-	printf("The thigh register value is %d\n", buffer);
-	regval = 13;
-	tlowreg_write_func(temp_fd, regval);
-	buffer = tlowreg_read_func(temp_fd);
-	printf("The tlow register value is %d\n", buffer);
+	op = temp_file_func();
+	if(op==0)
+	{
+		perror("init failed\n");
+	}
+	printf("temp sensor is ready\n");
+	tester = configreg_test(temp_fd);
+	if(tester==1)
+	{
+		printf("config reg test successful\n");
+	}
+	else
+	{
+		printf("config reg test failed\n");
+	}
+	tester1= configreg_interruptmode(temp_fd);
+	if(tester1==1)
+	{
+		printf("config reg interrupt test successful\n");
+	}
+	else
+	{
+		printf("config reg interrupt test failed\n");
+	}
+	tester2=configreg_shutdown(temp_fd)
+	if(tester2==1)
+	{
+		printf("config reg shutdown test successful\n");
+	}
+	else
+	{
+		printf("config reg shutdown test failed\n");
+	}
+	tester3=tlowreg_write(int temp_fd);
+	if(tester3==1)
+	{
+		printf("tlow reg test successful\n");
+	}
+	else
+	{
+		printf("tlow reg test failed\n");
+	}
+	tester4=thighreg_write(temp_fd);
+	if(tester4==1)
+	{
+		printf("thigh reg test successful\n");
+	}
+	else
+	{
+		printf("thigh reg test failed\n");
+	}
 	celcius = get_temperature(temp_fd);
 	fahrenheit=celcius*1.8+32; // celcius to Fahrenheit
 	kelvin=celcius+273.15; // celcius to kelvin

@@ -47,37 +47,16 @@ int main(void)
 	}
 	while(1)
 	{
-		printf("\n Enter the operation to be performed: 1) Get lux 2) Get temp\n");
-		scanf("%d",&operation);
-		send_data= send(sockfd,(void*)&operation,sizeof(operation),0);
-		printf("%d send data\n", send_data);
 		received = read(sockfd,&data,sizeof(data));
 		printf("%d received data from server\n", received);
 		if(received==sizeof(data))
 		{
-			printf("The received data is %d\n", data);
-			if(data!=0)
-			{
-				switch(operation)
-				{
-					case 1:
-					printf("Lux value is %d\n",data); //lux
-					break;
-					
-					case 2:
-					printf("Temperature value is %d\n", data); //temp
-					break;
-					
-					default:
-					printf("The operation is invalid\n"); //error
-					break;
-				}
-			}
-			else
-			{
-				printf("data read from the server is faulty\n");
-			}
-		 }
+			printf("The received temperature data is %d C\n", data);
+		}
+		else
+		{
+			printf("data read from the server is faulty\n");
+		}
 		
 	  }
 	  return 0;
