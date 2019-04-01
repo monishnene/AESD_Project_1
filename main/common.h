@@ -34,8 +34,13 @@
 #include "server.h"
 //#include "bist.h"
 #define STR_SIZE 200
+<<<<<<< HEAD
 #define LOGPORT 12017
 #define PORT_ADDRESS 12018
+=======
+#define LOGPORT 8045
+#define PORT_ADDRESS 8046
+>>>>>>> 4af544adbfb77f07d41834033a15853ff1300221
 #define ID_VALUE (0x50)
 #define ID_REGISTER (0x8A)
 #define ID_VAL (0x07)
@@ -112,7 +117,10 @@ typedef struct
 #define LOG_SIZE sizeof(log_t)
 
 uint8_t* logfile;
+<<<<<<< HEAD
 static uint32_t logger_port=LOGPORT,server_port=PORT_ADDRESS;
+=======
+>>>>>>> 4af544adbfb77f07d41834033a15853ff1300221
 static uint8_t heartbeat_check[TOTAL_HEARTS]={0,0,0,0};
 static uint8_t* thread_names[]={"Logger","Server","Temperature","Light"};
 static uint8_t* logtype[]={"LOG_INFO","LOG_DATA","LOG_ERROR"};
