@@ -16,19 +16,22 @@
 
 sem_t* sem_led;
 
-/************************************
-* led_init function
-* Function used for initializing LEDs
-*************************************/
+/***********************************************************************
+ * led_init()
+ * @brief This function is used to initialize files and folders for led
+***********************************************************************/
 void led_init(void)
-{	
-	sem_led = sem_open(led_sem_id,0);	
-	system(led_init_cmd);		
+{
+	sem_led = sem_open(led_sem_id,0);
+	system(led_init_cmd);
 }
-/**************************************
-* LED ON function to turn on the USR LEDs
-* by accessing the gpio pins
-****************************************/
+
+
+/***********************************************************************
+ * led_on()
+ * @param led to be turned on
+ * @brief This function is used to turn on led
+***********************************************************************/
 void led_on(uint8_t led)
 {
 	sem_wait(sem_led);
@@ -48,11 +51,11 @@ void led_on(uint8_t led)
 	return;
 }
 
-/**********************************************
-* LED OFF function to turn off LEDs by accessing 
-* the GPIO pins that can be accessed by user
-************************************************/
-
+/***********************************************************************
+ * led_off()
+ * @param led to be turned off
+ * @brief This function is used to turn off led
+***********************************************************************/
 void led_off(uint8_t led)
 {
 	sem_wait(sem_led);
@@ -72,14 +75,14 @@ void led_off(uint8_t led)
 	return;
 }
 
-/************************************
-* led toggle function to toggle leds 
-* in a pattern
-*************************************/
+/***********************************************************************
+ * led_toggle()
+ * @param led to be toggled
+ * @brief This function is used to toggle led
+***********************************************************************/
 void led_toggle(uint8_t led)
 {
 	FILE* fptr;
-	//printf("LED%d Toggle\n",led);
 	sem_wait(sem_led);
 	if(led<LED_COUNT)
 	{
@@ -93,32 +96,30 @@ void led_toggle(uint8_t led)
 		error=fread(&prev,1,1,fptr);
 		data=(prev=='0')?'1':'0';
 		error=fwrite(&data,1,1,fptr);
-		//fclose(fptr);
 	}
 	else
 	{
 		printf("LED index error\n");
 	}
 	sem_post(sem_led);
-	//printf("LED%d Toggle Done\n",led);
 }
 
-/**************************************
-* void main: to toggle leds with 
-* a specific delay
-***************************************/
+/********************************************t***************************
+ * main()
+ * @brief This function is used to test leds
+***********************************************************************/
 #ifdef LED_TEST
 void main()
 {
 	uint8_t led=0,i=0;
-	led_off(0);	
-	led_off(1);		
-	led_off(2);		
+	led_off(0);
+	led_off(1);
+	led_off(2);
 	led_off(3);
 	for(i=0;;i++)
 	{
 		usleep(1e5);
-		led_toggle(led);		
+		led_toggle(led);
 		led=(led==LED_COUNT-1)?0:(led+1);
 	}
 }

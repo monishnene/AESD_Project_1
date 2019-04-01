@@ -20,10 +20,12 @@ sem_t* sem_temp;
 sem_t* sem_i2c;
 uint8_t* shm_ptr;
 
-/********************
-* Write operation 
-***********************/
-
+/***********************************************************************
+ * i2c_read()
+ * @param fd file desciptor for i2c
+ * @param regval address to be written
+ * @brief This function is used to write data to i2c file
+***********************************************************************/
 static void i2c_write(int32_t fd,uint8_t regval)
 {
 	if(write(fd, &regval, sizeof(regval))<0)
@@ -32,22 +34,23 @@ static void i2c_write(int32_t fd,uint8_t regval)
 	}
 }
 
-/***************************
-* Read operation
-****************************/
-
+/***********************************************************************
+ * i2c_read()
+ * @param fd file desciptor for i2c
+ * @param buffer to fill data in
+ * @param size of the data to be read
+ * @brief This function is used to read data from i2c file
+***********************************************************************/
 static int32_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 {
 	return read(fd, buffer, size);
 }
 
-/********************************************************
-* Get temperature function
-* Reads tempreg
-* and obtained temp in celsius is output/16
-* return the temperature value
-*****************************************************/
-
+/***********************************************************************
+ * get_temperature()
+ * @return Temperature value read from sensor in Celcius
+ * @brief This function is used to read data from i2c for temperature
+***********************************************************************/
 static int32_t get_temperature(void)
 {
 	//printf("Temperature Get\n");
@@ -60,16 +63,17 @@ static int32_t get_temperature(void)
 	ioctl(fd, I2C_SLAVE, TEMP_SLAVE_ADDR);
 	//sensor tasks
 	i2c_write(fd,TEMP_REG_ADDR);
-	error = i2c_read(fd,buffer,sizeof(buffer));	
+	error = i2c_read(fd,buffer,sizeof(buffer));
 	sem_post(sem_i2c);
 	data = (((buffer[0] << 8) | buffer[1]) >> 4)/16.0; // temp data in C
 	return data;
 }
 
-/********************************************************
-* temperature_init function
-*****************************************************/
 
+/***********************************************************************
+ * temperature_init()
+ * @brief This function is used to initialize temperature measurement
+***********************************************************************/
 void temperature_init(void)
 {
 	//printf("Temperature Init\n");
@@ -78,18 +82,16 @@ void temperature_init(void)
 	shm_temp = shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
 }
 
-/*******************************************
-* temperature read function
-* read the temperature value
-* send the shared memory
-*******************************************/
-
+/***********************************************************************
+ * temperature_read()
+ * @brief This function is used to read data from temperature sensor and log it
+***********************************************************************/
 void temperature_read(void)
 {
 	uint8_t* msg= (uint8_t*)malloc(STR_SIZE);
 	led_toggle(temperature_led);
 	//declare variables
-	log_t log_data;	
+	log_t log_data;
 	int32_t celcius=0,error=0;
 	//data collection
 	celcius = get_temperature();

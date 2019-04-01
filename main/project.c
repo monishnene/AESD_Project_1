@@ -46,11 +46,12 @@ struct sigaction signal_action;
 pthread_t thread_light,thread_temperature,thread_logger,thread_server;
 sigset_t mask;
 
-/*****************************
-* Temperature run function
-* runs the temperature task
-* and exits the thread
-********************************/
+/***********************************************************************
+ * temperature_run()
+ * param ptr pointer to data passed
+ * return ptr pointer to data to be returned
+ * @brief run temperature measurement functions
+/***********************************************************************/
 void* temperature_run(void* ptr)
 {
 	heartbeat_check[temperature_heart]=1;
@@ -58,11 +59,12 @@ void* temperature_run(void* ptr)
 	pthread_exit(ptr);
 }
 
-/*****************************
-* light run function
-* runs the light task
-* and exits the thread
-********************************/
+/***********************************************************************
+ * light_run()
+ * param ptr pointer to data passed
+ * return ptr pointer to data to be returned
+ * @brief run light measurement functions
+/***********************************************************************/
 void* light_run(void* ptr)
 {
 	heartbeat_check[light_heart]=1;
@@ -70,31 +72,34 @@ void* light_run(void* ptr)
 	pthread_exit(ptr);
 }
 
-/*****************************
-* logger run function
-* runs the logger task
-* and exits the thread
-********************************/
+/***********************************************************************
+ * logger_run()
+ * @param ptr pointer to data passed
+ * @return ptr pointer to data to be returned
+ * @brief run logger functions
+/***********************************************************************/
 void* logger_run(void* ptr)
 {
 	logger();
 	pthread_exit(ptr);
 }
 
-/**************************************
-* Remote Socket server run function
-* runs the socket server task
-* and exits the thread
-***************************************/
+/***********************************************************************
+ * server_run()
+ * @param ptr pointer to data passed
+ * @return ptr pointer to data to be returned
+ * @brief run server functions
+/***********************************************************************/
 void* server_run(void* ptr)
-{	
+{
 	remote_server();
-	pthread_exit(ptr);	
+	pthread_exit(ptr);
 }
 
-/*****************************
-* log file setup function
-********************************/
+/***********************************************************************
+ * logfile_setup()
+ * @brief create a backup of old log file and create a new one
+/***********************************************************************/
 void logfile_setup(void)
 {
 	FILE* fptr=fopen(logfile,"r");
@@ -108,12 +113,17 @@ void logfile_setup(void)
 	{
 		fclose(fptr);
 		sprintf(new_filename,"backup_%d_%s",counter++,logfile); //to create backup files
-		fptr=fopen(new_filename,"r");	
+		fptr=fopen(new_filename,"r");
 	}
 	rename(logfile,new_filename);
 	return;
 }
 
+
+/***********************************************************************
+ * temperature_thread()
+ * @brief create and join temperature measurement thread
+/***********************************************************************/
 void temperature_thread()
 {
 	int32_t error = pthread_create(&thread_temperature,NULL,temperature_run,NULL);
@@ -124,7 +134,7 @@ void temperature_thread()
 	//pthread join
 	error=pthread_join(thread_temperature,NULL);
 	if(error)
-	{			
+	{
 		sprintf(msg,"Error Joining Temperature Thread %d",error);
 		log_creator(LOG_ERROR,msg);
 		bzero(msg,STR_SIZE);
@@ -132,16 +142,21 @@ void temperature_thread()
 	log_creator(LOG_INFO,"Created and joined new thread for measuring temperature");
 }
 
+
+/***********************************************************************
+ * light_thread()
+ * @brief create and join light measurement thread
+/***********************************************************************/
 void light_thread()
 {
 	int32_t error = pthread_create(&thread_light,NULL,light_run,NULL);
 	if(error)
-	{	
+	{
 		log_creator(LOG_ERROR,"Error Creating Light Thread");
 	}
 	error=pthread_join(thread_light,NULL);
 	if(error)
-	{	
+	{
 		sprintf(msg,"Error Joining light Thread %d",error);
 		log_creator(LOG_ERROR,msg);
 		bzero(msg,STR_SIZE);
@@ -149,7 +164,10 @@ void light_thread()
 	log_creator(LOG_INFO,"Created and joined new thread for measuring light");
 }
 
-
+/***********************************************************************
+ * logger_thread()
+ * @brief create and join logger thread
+/***********************************************************************/
 void logger_thread()
 {
 	//pthread creation logger
@@ -170,7 +188,10 @@ void logger_thread()
 	}
 }
 
-
+/***********************************************************************
+ * server_thread()
+ * @brief create and join server thread
+/***********************************************************************/
 void server_thread(void)
 {
 	//pthread creation server
@@ -185,7 +206,7 @@ void server_thread(void)
 		error=pthread_join(thread_server,NULL);
 	}
 	if(error)
-	{	
+	{
 		sprintf(msg,"Error Joining Server Thread %d",error);
 		log_creator(LOG_ERROR,msg);
 		bzero(msg,STR_SIZE);
@@ -193,17 +214,17 @@ void server_thread(void)
 	log_creator(LOG_INFO,"Created and joined new thread for server");
 }
 
-/*****************************
-* System end function
-* unlinks the linked memories for
-* different tasks
-********************************/
+/***********************************************************************
+ * system_end()
+ * @param sig to be handled
+ * @brief this function is used to exit smoothly when SIGINT is sent to main process
+ /***********************************************************************/
 void system_end(int sig)
 {
 	condition=0;
 	logger_condition=0;
 	server_condition=0;
-	sem_unlink(shm_temp_id);	
+	sem_unlink(shm_temp_id);
     	sem_unlink(shm_light_id);
 	sem_unlink(trigger_sem_id);
 	sem_unlink(led_sem_id);
@@ -212,9 +233,10 @@ void system_end(int sig)
 	sem_unlink(logger_ready_id);
 }
 
-/*************************************
-* join threads based on trigger value
-***************************************/
+/***********************************************************************
+ * heartbeat()
+ * @brief this function is used check if all threads are running properly and restart any stopped thread
+ /***********************************************************************/
 static void heartbeat(void)
 {
 	uint8_t i=0,count=0,dummy='?',reply=0;
@@ -225,7 +247,7 @@ static void heartbeat(void)
         setsockopt(query,SOL_SOCKET,SO_SNDTIMEO, (const char*)&timer,sizeof(timer));
 	sock_heartbeat.sin_addr.s_addr = INADDR_ANY;
         sock_heartbeat.sin_family = AF_INET;
-	sock_heartbeat.sin_port = htons(logger_port);	
+	sock_heartbeat.sin_port = htons(logger_port);
 	query = socket(AF_INET, SOCK_STREAM, 0);
         error = connect(query, (struct sockaddr *)&sock_heartbeat, sizeof(sock_heartbeat));
 	error = write(query,&dummy,sizeof(dummy));
@@ -234,9 +256,9 @@ static void heartbeat(void)
 	{
 		heartbeat_check[logger_heart]=1;
 	}
-	close(query);	
-	reply=0;	
-	sock_heartbeat.sin_port = htons(server_port);	
+	close(query);
+	reply=0;
+	sock_heartbeat.sin_port = htons(server_port);
 	query = socket(AF_INET, SOCK_STREAM, 0);
         error = connect(query, (struct sockaddr *)&sock_heartbeat, sizeof(sock_heartbeat));
 	error = write(query,&dummy,sizeof(dummy));
@@ -244,7 +266,7 @@ static void heartbeat(void)
 	if(dummy==reply)
 	{
 		heartbeat_check[server_heart]=1;
-	}	
+	}
 	close(query);
 	for(i=0;i<TOTAL_HEARTS;i++)
 	{
@@ -254,7 +276,7 @@ static void heartbeat(void)
 			{
 				case logger_heart:
 				{
-					printf("logger thread is dead and will be restarted");	
+					printf("logger thread is dead and will be restarted");
 					logger_condition=1;
 					logger_port+=2;
 					logger_thread();
@@ -270,7 +292,7 @@ static void heartbeat(void)
 					break;
 				}
 				case light_heart:
-				{					
+				{
 					log_creator(LOG_ERROR,"light thread is dead and will be restarted");
 					if(!fork())
 					{
@@ -300,7 +322,13 @@ static void heartbeat(void)
 	}
 }
 
-
+/***********************************************************************
+ * join_threads()
+ * @param sig to be handled
+ * @param si signal information
+ * @param uc data passed
+ * @brief this function is used to run threads when triggered by timer
+ /***********************************************************************/
 static void join_threads(int sig, siginfo_t *si, void *uc)
 {
 	temperature_thread();
@@ -308,12 +336,13 @@ static void join_threads(int sig, siginfo_t *si, void *uc)
 	heartbeat();
 }
 
-/*************************
-* Timer init
-* Setting up the timer
-***************************/
+/***********************************************************************
+ * timer_init()
+ * @return error if any
+ * @brief this function is used to setup timer for temperature and light measurement
+ /***********************************************************************/
 int32_t timer_init(void)
-{	
+{
 	int32_t error=0;
 	printf("Timer Init\n");
 	// Timer init
@@ -321,18 +350,25 @@ int32_t timer_init(void)
 	signal_action.sa_sigaction = join_threads;//Function to be executed
 	sigemptyset(&signal_action.sa_mask);
 	error=sigaction(SIGRTMIN, &signal_action, NULL);
-        signal_event.sigev_notify = SIGEV_SIGNAL;
-        signal_event.sigev_signo = SIGRTMIN;
-        signal_event.sigev_value.sival_ptr = &timerid;
-        error=timer_create(CLOCK_REALTIME, &signal_event, &timerid);
+    signal_event.sigev_notify = SIGEV_SIGNAL;
+    signal_event.sigev_signo = SIGRTMIN;
+    signal_event.sigev_value.sival_ptr = &timerid;
+    error=timer_create(CLOCK_REALTIME, &signal_event, &timerid);
 	/* Start the timer */
-        timer_data.it_value.tv_sec = PERIOD;
-        timer_data.it_value.tv_nsec = 0;
-        timer_data.it_interval.tv_sec = timer_data.it_value.tv_sec;
-        timer_data.it_interval.tv_nsec = timer_data.it_value.tv_nsec;
+    timer_data.it_value.tv_sec = PERIOD;
+    timer_data.it_value.tv_nsec = 0;
+    timer_data.it_interval.tv_sec = timer_data.it_value.tv_sec;
+    timer_data.it_interval.tv_nsec = timer_data.it_value.tv_nsec;
 	error=timer_settime(timerid, 0, &timer_data, NULL);
+	return error;
 }
 
+
+/***********************************************************************
+ * kill_logger()
+ * @param sig to be handled
+ * @brief this function is used to kill logger thread with USR1
+ /***********************************************************************/
 void kill_logger(int sig)
 {
 	log_creator(LOG_ERROR,"USR1 Kill logger command received");
@@ -341,19 +377,24 @@ void kill_logger(int sig)
 	logger_condition=0;
 }
 
+/***********************************************************************
+ * kill_server()
+ * @param sig to be handled
+ * @brief this function is used to kill server thread with USR2
+ /***********************************************************************/
 void kill_server(int sig)
 {
-	log_creator(LOG_ERROR,"USR2 Kill server command received");	
+	log_creator(LOG_ERROR,"USR2 Kill server command received");
 	printf("USR2 Kill server command received\n");
 	pthread_cancel(thread_server);
 	server_condition=0;
 }
 
-/**********************************
-* system init
-* To initialize the shared memory
-***********************************/
-
+/***********************************************************************
+ * system_init()
+ * @return error if any
+ * @brief this function is used to initialize all the resources of the project
+ /***********************************************************************/
 int32_t system_init(void)
 {
 	int32_t error=0;
@@ -362,7 +403,7 @@ int32_t system_init(void)
 	condition=1;
 	ptr=NULL;
 	printf("System Init\n");
-	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT); 
+	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
 	shm_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
 	sem_logger_ready=sem_open(logger_ready_id, O_CREAT, 0644,0);
 	sem_open(shm_temp_id, O_CREAT, 0644,1);
@@ -370,8 +411,8 @@ int32_t system_init(void)
 	sem_open(shm_light_id, O_CREAT, 0644,1);
 	sem_open(logfile_sem_id, O_CREAT, 0644,1);
 	sem_open(i2c_sem_id, O_CREAT, 0644,1);
-	sem_trigger=sem_open(trigger_sem_id, O_CREAT, 0644,1);		
-	logfile_setup();	
+	sem_trigger=sem_open(trigger_sem_id, O_CREAT, 0644,1);
+	logfile_setup();
 	logger_init();
 	led_init();
 	temperature_init();
@@ -381,12 +422,19 @@ int32_t system_init(void)
 	signal(SIGUSR2,kill_server);
 	signal(SIGINT,system_end);
 	error=timer_init();
+    return error;
 }
 
+/***********************************************************************
+ * main()
+ * @param argc number of command line arguments passed
+ * @param argv command line arguments passed (logfile name)
+ * @brief This is the main function for the Project.
+ /***********************************************************************/
 int32_t main(int32_t argc, uint8_t **argv)
 {
 	int32_t error=0;
-	pid_t process_id = getpid();	
+	pid_t process_id = getpid();
 	printf("Process ID = %d\n",process_id);
 	msg=(uint8_t*)malloc(STR_SIZE);
 	ptr=&error;
@@ -395,20 +443,20 @@ int32_t main(int32_t argc, uint8_t **argv)
 		printf("%s <logfilename>\n",argv[0]);	 //log file name as command line argument
 		return 0;
 	}
-	logfile=argv[1];		
-	error=system_init();	
+	logfile=argv[1];
+	error=system_init();
 	logger_thread();
 	sem_wait(sem_logger_ready);
-	log_creator(LOG_INFO,"Built in start up tests done");	
+	log_creator(LOG_INFO,"Built in start up tests done");
 	server_thread();
 	if(process_id!=getpid())
 	{
 		kill(getpid(),SIGINT);
-	}	
+	}
 	error=bist_check();
 	while(condition)
 	{
-	
+
 	}
 	free(msg);
 }

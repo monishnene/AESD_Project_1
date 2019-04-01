@@ -19,36 +19,33 @@ sem_t* sem_temp;
 sem_t* sem_light;
 uint8_t* shm_ptr;
 
-/*****************************
-* find temperature function
-* celsius value is printed
-********************************/
-
+/***********************************************************************
+ * find_temperature()
+ * @return temperature value read
+ * @brief This function is used to read temperature from shared memory
+/***********************************************************************/
 static int16_t find_temperature (void)
 {
 	int32_t error=0;
 	log_t temp_data;
-	//join thread  here temperature
-      	sem_wait(sem_temp);
+	sem_wait(sem_temp);
 	shm_ptr=shmat(server_temp,(void*)0,0);
-	//printf("Shared Memory Access\n");
 	memcpy(&temp_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
 	sem_post(sem_temp);
-	return temp_data.data[celcius_id]; 
+	return temp_data.data[celcius_id];
 }
 
-/*****************************
-* find luminosity function
-* lux value is printed
-********************************/
-
+/***********************************************************************
+ * find_luminosity()
+ * @return light value read
+ * @brief This function is used to read luminosity from shared memory
+/***********************************************************************/
 static int16_t find_luminosity(void)
 {
 	int32_t error=0;
 	log_t light_data;
-	//join thread  here light
-      	sem_wait(sem_light);
+    sem_wait(sem_light);
 	shm_ptr=shmat(server_light,(void*)0,0);
 	memcpy(&light_data,shm_ptr,LOG_SIZE);
 	shmdt(shm_ptr);
@@ -56,21 +53,19 @@ static int16_t find_luminosity(void)
 	return light_data.data[luminosity_id];
 }
 
-/*****************************
-* Remote server function
-* To send lux and temperature data
-* to the client
-********************************/
-
+/***********************************************************************
+ * remote_server()
+ * @brief This function is used to continuously run remote server
+***********************************************************************/
 void remote_server(void)
 {
 	int32_t sockfd=0,conn=0, fork_child=1, serverlen=0, size=0, temp=0, light=0;
 	uint8_t value=0;
 	struct hostent* hostptr;
 	struct sockaddr_in server_addr, client_addr;
-	sockfd = socket(AF_INET, SOCK_STREAM,0);	
+	sockfd = socket(AF_INET, SOCK_STREAM,0);
 	//shared mem
-	server_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT); 
+	server_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
 	server_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
 	sem_temp = sem_open(shm_temp_id,0);
 	sem_light = sem_open(shm_light_id,0);
@@ -99,7 +94,7 @@ void remote_server(void)
 	{
 		//connection accept
 		conn=accept(sockfd,(struct sockaddr*)&client_addr,&serverlen);
-		if(!fork()) 
+		if(!fork())
 		{
 			size=recv(conn,&value,sizeof(value),0);
 			if(value=='?')

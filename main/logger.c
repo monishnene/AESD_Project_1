@@ -28,9 +28,10 @@ struct tm *time_and_date;
 int32_t socket_desc;
 struct sockaddr_in sock_struct_client,sock_struct_server;
 
-/*************************************
-* logger init function
-**************************************/
+/***********************************************************************
+ * logger_init()
+ * @brief This function is used to intialize the resources required for logger
+ /***********************************************************************/
 void logger_init(void)
 {
 	FILE* fptr;
@@ -42,26 +43,31 @@ void logger_init(void)
 	sem_light = sem_open(shm_light_id,0);
 	sem_logger_ready = sem_open(logger_ready_id,0);
 	shm_light=shmget(luminosity_id,LOG_SIZE,0666|IPC_CREAT);
-	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);	
+	shm_temp=shmget(temperature_id,LOG_SIZE,0666|IPC_CREAT);
       	//sem_getvalue(sem_logfile,&error);
 	//printf("sem_logfile = %d\n",error);
-	sem_wait(sem_logfile);	
+	sem_wait(sem_logfile);
 	fptr=fopen(logfile,"w");
 	if(fptr==NULL)  //error check
 	{
-		printf("File opening error\n"); 
-	}	
+		printf("File opening error\n");
+	}
 	fclose(fptr);
 	sem_post(sem_logfile);
 	sock_struct_server.sin_addr.s_addr = INADDR_ANY;
-        sock_struct_server.sin_family = AF_INET;
+    sock_struct_server.sin_family = AF_INET;
 	sock_struct_server.sin_port = htons(logger_port);
 	sock_struct_client.sin_addr.s_addr = INADDR_ANY;
-        sock_struct_client.sin_family = AF_INET;
-	sock_struct_client.sin_port = htons(logger_port);	
-    	
+    sock_struct_client.sin_family = AF_INET;
+	sock_struct_client.sin_port = htons(logger_port);
 }
 
+/***********************************************************************
+ * logger_creator()
+ * @param logid type of log
+ * @param str message to be logged
+ * @brief log creator to create log
+ /***********************************************************************/
 void log_creator(uint8_t logid, uint8_t* str)
 {
 	int32_t error=0,sock=0;
@@ -73,15 +79,16 @@ void log_creator(uint8_t logid, uint8_t* str)
 	sprintf(msg,"[PID:%d][TID:%d][%d.%d sec] %s-> %s\n",process_id,thread_id,timestamp.tv_sec,timestamp.tv_nsec,logtype[logid],str);
 	sock = socket(AF_INET, SOCK_STREAM, 0);
         error = connect(sock, (struct sockaddr *)&sock_struct_client, sizeof(sock_struct_client));
-	error = write(sock,msg,strlen(msg));	
+	error = write(sock,msg,strlen(msg));
 	close(sock);
 }
 
-/*****************************
-* logger function to log data
-******************************/
+/***********************************************************************
+ * logger()
+ * @brief logger to run continuously and log data
+ /***********************************************************************/
 void logger(void)
-{	
+{
 	FILE* fptr;
 	uint8_t* msg = (uint8_t*)malloc(STR_SIZE);
 	int32_t error=0,sock=0,struct_size = sizeof(struct sockaddr_in),size=0;
@@ -94,7 +101,7 @@ void logger(void)
 	{
 		//connection accept
 		sock = accept(socket_desc,(struct sockaddr*)&sock_struct_server,(socklen_t*)&struct_size);
-		if(!fork()) 
+		if(!fork())
 		{
 			led_toggle(logger_led);
 			size=read(sock,msg,STR_SIZE); //receive data from log creator
@@ -103,11 +110,11 @@ void logger(void)
 				size=write(sock,msg,1);
 				break;
 			}
-			sem_wait(sem_logfile);	
+			sem_wait(sem_logfile);
 			fptr=fopen(logfile,"a");
 			n=fwrite(msg,1,size,fptr);
 			fclose(fptr);
-			sem_post(sem_logfile);	
+			sem_post(sem_logfile);
 			break;
 		}
 	}

@@ -27,12 +27,16 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+
+//My includes
 #include "logger.h"
 #include "light_read.h"
 #include "bbgled.h"
 #include "temperature_read.h"
 #include "server.h"
 #include "bist_test.h"
+
+//Macros
 #define STR_SIZE 200
 #define LOGPORT 12047
 #define PORT_ADDRESS 12048
@@ -68,30 +72,30 @@
 #define shutdown       (0x61a0)
 #define TOTAL_HEARTS 4
 
-typedef enum
+typedef enum //This enum is used for heartbeats
 {
-	logger_heart=0,	
+	logger_heart=0,
 	server_heart=1,
 	temperature_heart=2,
 	light_heart=3,
 }heart_t;
 
-typedef enum
+typedef enum //This enum is used for logtypr
 {
 	LOG_INFO=0,
 	LOG_DATA=1,
 	LOG_ERROR=2,
 }logtype_t;
 
-typedef enum               //enum to turn on/off leds according to the tasks
+typedef enum   //enum to turn on/off leds according to the tasks
 {
 	logger_led=0,
 	light_led=1,
 	temperature_led=2,
 	error_led=3,
 }led_t;
- 
-typedef enum              //enum with id values  assigned according to tasks
+
+typedef enum   //enum with id values  assigned according to tasks
 {
 	kelvin_id=0,
 	celcius_id=1,
@@ -104,11 +108,11 @@ typedef enum              //enum with id values  assigned according to tasks
 	project_id=7,
 }header_t;
 
-typedef struct
+typedef struct //This struct is used to store data in shared memory
 {
 	header_t header;
 	struct timespec timestamp;
-	int32_t data[3];  
+	int32_t data[3];
 }log_t;
 
 #define LOG_SIZE sizeof(log_t)
