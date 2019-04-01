@@ -103,7 +103,16 @@ void temperature_read(void)
 	shm_ptr=shmat(shm_temp,(void*)0,0);
 	memcpy(shm_ptr,&log_data,LOG_SIZE);
 	shmdt(shm_ptr);
-	sem_post(sem_temp);	
+	sem_post(sem_temp);
+	if(celcius<15)
+	{
+		log_creator(LOG_ERROR,"The Temperature is below 15°C");
+		led_off(error_led);
+	}
+	else
+	{
+		led_on(error_led);
+	}
 	sprintf(msg,"Temperature: %d°C, %d°K, %d°F",log_data.data[celcius_id],log_data.data[kelvin_id],log_data.data[fahrenheit_id]);
 	log_creator(LOG_DATA,msg);
 	free(msg);

@@ -215,59 +215,7 @@ void system_end(int sig)
 /*************************************
 * join threads based on trigger value
 ***************************************/
-void heartbeat(void)
-<<<<<<< HEAD
-=======
-{
-	uint8_t i=0,count=0,dummy='?',reply=0;
-	int32_t socket_desc=0,query=0,error=0;
-	struct sockaddr_in sock_heartbeat;
-	sock_heartbeat.sin_addr.s_addr = INADDR_ANY;
-        sock_heartbeat.sin_family = AF_INET;
-	sock_heartbeat.sin_port = htons(LOGPORT);	
-	query = socket(AF_INET, SOCK_STREAM, 0);
-        error = connect(query, (struct sockaddr *)&sock_heartbeat, sizeof(sock_heartbeat));
-	error = write(query,&dummy,sizeof(dummy));
-	error = read(query,&reply,sizeof(reply));
-	if(dummy==reply)
-	{
-		heartbeat_check[logger_heart]=1;
-	}	
-	close(query);	
-	reply=0;	
-	sock_heartbeat.sin_port = htons(PORT_ADDRESS);	
-	query = socket(AF_INET, SOCK_STREAM, 0);
-        error = connect(query, (struct sockaddr *)&sock_heartbeat, sizeof(sock_heartbeat));
-	error = write(query,&dummy,sizeof(dummy));
-	error = read(query,&reply,sizeof(reply));
-	if(dummy==reply)
-	{
-		heartbeat_check[server_heart]=1;
-	}	
-	close(query);
-	for(i=0;i<TOTAL_HEARTS;i++)
-	{
-		if(!heartbeat_check[i])
-		{
-			sprintf(msg,"%s thread is dead",thread_names[i]);
-			log_creator(LOG_ERROR,msg);
-			bzero(msg,STR_SIZE);
-		}
-		count+=heartbeat_check[i];
-	}
-	if(count==TOTAL_HEARTS)
-	{
-		log_creator(LOG_INFO,"All threads are alive");
-	}
-	for(i=0;i<TOTAL_HEARTS;i++)
-	{
-		heartbeat_check[i]=0;
-	}
-}
-
-
-static void join_threads(int sig, siginfo_t *si, void *uc)
->>>>>>> 4af544adbfb77f07d41834033a15853ff1300221
+static void heartbeat(void)
 {
 	uint8_t i=0,count=0,dummy='?',reply=0;
 	int32_t socket_desc=0,query=0,error=0;
@@ -350,7 +298,6 @@ static void join_threads(int sig, siginfo_t *si, void *uc)
 	{
 		heartbeat_check[i]=0;
 	}
-	heartbeat();
 }
 
 
