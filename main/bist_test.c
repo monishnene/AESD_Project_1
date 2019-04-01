@@ -1,15 +1,20 @@
 /******************************************
 * bist_test.c
+* Advanced Embedded Software Development Project 1 
 * Author: Sanika Dongre and Monish Nene
 * Date created: 03/29/19
+* @brief This file has built in self test funcitons
 *******************************************/
 
 #include "bist_test.h"
 sem_t* sem_i2c;
-/***********************
-*i2c_file function
-************************/
 
+/***********************************************************************
+ * 
+ * This funtion has the initialization and main loop with switch case for udp client
+ * @param fd file descriptor
+ * @brief 
+***********************************************************************/
 uint8_t i2c_file(int32_t fd)
 {
 	fd=open("/dev/i2c-2", O_RDWR);
