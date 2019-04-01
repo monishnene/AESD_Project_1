@@ -35,7 +35,7 @@ void led_on(uint8_t led)
 	if(led<LED_COUNT)
 	{
 		path[pathx]='3'+led;
-		FILE* fptr=fopen(path,"w");
+		FILE* fptr=fopen(path,"w+");
 		uint8_t data='1',error=0;
 		error=fwrite(&data,1,1,fptr);
 		//fclose(fptr);
@@ -59,7 +59,7 @@ void led_off(uint8_t led)
 	if(led<LED_COUNT)
 	{
 		path[pathx]='3'+led;
-		FILE* fptr=fopen(path,"w");
+		FILE* fptr=fopen(path,"w+");
 		uint8_t data='0',error=0;
 		error=fwrite(&data,1,1,fptr);
 		//fclose(fptr);

@@ -26,7 +26,7 @@
 *******************************************/
 
 #define IP_ADDR "10.0.0.152" //ip addr
-#define PORT_ADDRESS 12024
+#define PORT_ADDRESS 12048
 
 int main(void)
 {
@@ -39,7 +39,7 @@ int main(void)
 	{
 		perror("socket creation failed\n");
 	}
-	puts("socket creation successfull\n");
+	puts("socket creation successful\n");
 	memset((char*)&server_addr,0,sizeof(server_addr));
 	server_addr.sin_family=AF_INET;
 	server_addr.sin_port = htons(PORT_ADDRESS);

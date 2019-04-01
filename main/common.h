@@ -32,10 +32,10 @@
 #include "bbgled.h"
 #include "temperature_read.h"
 #include "server.h"
-//#include "bist.h"
+#include "bist_test.h"
 #define STR_SIZE 200
-#define LOGPORT 12023
-#define PORT_ADDRESS 12024
+#define LOGPORT 12047
+#define PORT_ADDRESS 12048
 #define ID_VALUE (0x50)
 #define ID_REGISTER (0x8A)
 #define ID_VAL (0x07)
@@ -59,11 +59,13 @@
 #define CH1_H (0x8F)
 #define slave_addr     (0x48)
 #define tempregaddr    (00)
-#define inicond        (0xA060)
+#define inicond        (0x60A0)
 #define configregaddr  (0x01)
 #define tlowregaddr    (0x02)
 #define thighregaddr   (0x03)
 #define highmask       (0x00FF)
+#define interruptval   (0x62a0)
+#define shutdown       (0x61a0)
 #define TOTAL_HEARTS 4
 
 typedef enum

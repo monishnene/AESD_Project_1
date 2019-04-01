@@ -398,9 +398,14 @@ int32_t main(int32_t argc, uint8_t **argv)
 	logfile=argv[1];		
 	error=system_init();	
 	logger_thread();
-	sem_wait(sem_logger_ready);	
-	//error=bist();	
+	sem_wait(sem_logger_ready);
+	log_creator(LOG_INFO,"Built in start up tests done");	
 	server_thread();
+	if(process_id!=getpid())
+	{
+		kill(getpid(),SIGINT);
+	}	
+	error=bist_check();
 	while(condition)
 	{
 	

@@ -5,15 +5,16 @@
 			lightsensor.c \
 			tempsensor.c \
 			bbgled.c \
-			server.c
+			server.c \
+			bist_test.c
 	
 	common_includes =	common.h \
 			 	bbgled.h \
 				light_read.h \
 				temperature_read.h \
 				logger.h \
-				server.h 
-				
+				server.h \
+				bist_test.h
 
 	common_flags =	-lrt \
 			-pthread \
@@ -23,7 +24,8 @@
 				light_read.o \
 				temperature_read.o \
 				logger.o \
-				server.o 
+				server.o \
+				bist_test.o
 				
 	ip = 10.0.0.152
 
