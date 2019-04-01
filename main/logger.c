@@ -55,10 +55,10 @@ void logger_init(void)
 	sem_post(sem_logfile);
 	sock_struct_server.sin_addr.s_addr = INADDR_ANY;
         sock_struct_server.sin_family = AF_INET;
-	sock_struct_server.sin_port = htons(LOGPORT);
+	sock_struct_server.sin_port = htons(logger_port);
 	sock_struct_client.sin_addr.s_addr = INADDR_ANY;
         sock_struct_client.sin_family = AF_INET;
-	sock_struct_client.sin_port = htons(LOGPORT);	
+	sock_struct_client.sin_port = htons(logger_port);	
     	
 }
 

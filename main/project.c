@@ -19,7 +19,7 @@
 * Macros
 *******************************************/
 
-#define PERIOD 1
+#define PERIOD 5
 #define DEBUG 1
 #ifndef DEBUG
 #define printf(fmt, ...) (0)
@@ -114,6 +114,85 @@ void logfile_setup(void)
 	return;
 }
 
+void temperature_thread()
+{
+	int32_t error = pthread_create(&thread_temperature,NULL,temperature_run,NULL);
+	if(error)
+	{
+		log_creator(LOG_ERROR,"Error Creating Temperature Thread");
+	}
+	//pthread join
+	error=pthread_join(thread_temperature,NULL);
+	if(error)
+	{			
+		sprintf(msg,"Error Joining Temperature Thread %d",error);
+		log_creator(LOG_ERROR,msg);
+		bzero(msg,STR_SIZE);
+	}
+	log_creator(LOG_INFO,"Created and joined new thread for measuring temperature");
+}
+
+void light_thread()
+{
+	int32_t error = pthread_create(&thread_light,NULL,light_run,NULL);
+	if(error)
+	{	
+		log_creator(LOG_ERROR,"Error Creating Light Thread");
+	}
+	error=pthread_join(thread_light,NULL);
+	if(error)
+	{	
+		sprintf(msg,"Error Joining light Thread %d",error);
+		log_creator(LOG_ERROR,msg);
+		bzero(msg,STR_SIZE);
+	}
+	log_creator(LOG_INFO,"Created and joined new thread for measuring light");
+}
+
+
+void logger_thread()
+{
+	//pthread creation logger
+	int32_t error = pthread_create(&thread_logger,NULL,logger_run,NULL);
+	if(error)
+	{
+		printf("Error Creating Logger Thread\n");
+		kill(getpid(),SIGINT);
+	}
+	if(!fork())
+	{
+		error=pthread_join(thread_logger,NULL);
+	}
+	if(error)
+	{
+		printf("Error Joining logger Thread %d\n",error);
+		kill(getpid(),SIGINT);
+	}
+}
+
+
+void server_thread(void)
+{
+	//pthread creation server
+	printf("Creating server with port address:%d\n",server_port);
+	int32_t error=pthread_create(&thread_server,NULL,server_run,NULL);   //error checks
+	if(error)
+	{
+		log_creator(LOG_ERROR,"Error Creating Server Thread");
+	}
+	if(!fork())
+	{
+		error=pthread_join(thread_server,NULL);
+	}
+	if(error)
+	{	
+		sprintf(msg,"Error Joining Server Thread %d",error);
+		log_creator(LOG_ERROR,msg);
+		bzero(msg,STR_SIZE);
+	}
+	log_creator(LOG_INFO,"Created and joined new thread for server");
+}
+
 /*****************************
 * System end function
 * unlinks the linked memories for
@@ -122,6 +201,8 @@ void logfile_setup(void)
 void system_end(int sig)
 {
 	condition=0;
+	logger_condition=0;
+	server_condition=0;
 	sem_unlink(shm_temp_id);	
     	sem_unlink(shm_light_id);
 	sem_unlink(trigger_sem_id);
@@ -139,9 +220,12 @@ void heartbeat(void)
 	uint8_t i=0,count=0,dummy='?',reply=0;
 	int32_t socket_desc=0,query=0,error=0;
 	struct sockaddr_in sock_heartbeat;
+	struct timespec timer;
+	timer.tv_sec=1;
+        setsockopt(query,SOL_SOCKET,SO_SNDTIMEO, (const char*)&timer,sizeof(timer));
 	sock_heartbeat.sin_addr.s_addr = INADDR_ANY;
         sock_heartbeat.sin_family = AF_INET;
-	sock_heartbeat.sin_port = htons(LOGPORT);	
+	sock_heartbeat.sin_port = htons(logger_port);	
 	query = socket(AF_INET, SOCK_STREAM, 0);
         error = connect(query, (struct sockaddr *)&sock_heartbeat, sizeof(sock_heartbeat));
 	error = write(query,&dummy,sizeof(dummy));
@@ -149,10 +233,10 @@ void heartbeat(void)
 	if(dummy==reply)
 	{
 		heartbeat_check[logger_heart]=1;
-	}	
+	}
 	close(query);	
 	reply=0;	
-	sock_heartbeat.sin_port = htons(PORT_ADDRESS);	
+	sock_heartbeat.sin_port = htons(server_port);	
 	query = socket(AF_INET, SOCK_STREAM, 0);
         error = connect(query, (struct sockaddr *)&sock_heartbeat, sizeof(sock_heartbeat));
 	error = write(query,&dummy,sizeof(dummy));
@@ -166,9 +250,43 @@ void heartbeat(void)
 	{
 		if(!heartbeat_check[i])
 		{
-			sprintf(msg,"%s thread is dead",thread_names[i]);
-			log_creator(LOG_ERROR,msg);
-			bzero(msg,STR_SIZE);
+			switch(i)
+			{
+				case logger_heart:
+				{
+					printf("logger thread is dead and will be restarted");	
+					logger_condition=1;
+					logger_port+=2;
+					logger_thread();
+					break;
+				}
+				case temperature_heart:
+				{
+					log_creator(LOG_ERROR,"temperature thread is dead and will be restarted");
+					if(!fork())
+					{
+						temperature_thread();
+					}
+					break;
+				}
+				case light_heart:
+				{					
+					log_creator(LOG_ERROR,"light thread is dead and will be restarted");
+					if(!fork())
+					{
+						light_thread();
+					}
+					break;
+				}
+				case server_heart:
+				{
+					log_creator(LOG_ERROR,"server thread is dead and will be restarted");
+					server_condition=1;
+					server_port+=2;
+					server_thread();
+					break;
+				}
+			}
 		}
 		count+=heartbeat_check[i];
 	}
@@ -185,32 +303,8 @@ void heartbeat(void)
 
 static void join_threads(int sig, siginfo_t *si, void *uc)
 {
-	int32_t error = pthread_create(&thread_temperature,NULL,temperature_run,NULL);
-	if(error)
-	{
-		log_creator(LOG_ERROR,"Error Creating Temperature Thread");
-	}
-	error = pthread_create(&thread_light,NULL,light_run,NULL);
-	if(error)
-	{	
-		log_creator(LOG_ERROR,"Error Creating Light Thread");
-	}
-	log_creator(LOG_INFO,"Created new threads to measure temperature and luminosity. Joining threads");
-	//pthread join
-	error=pthread_join(thread_temperature,NULL);
-	if(error)
-	{			
-		sprintf(msg,"Error Joining Temperature Thread %d",error);
-		log_creator(LOG_ERROR,msg);
-		bzero(msg,STR_SIZE);
-	}
-	error=pthread_join(thread_light,NULL);
-	if(error)
-	{	
-		sprintf(msg,"Error Joining light Thread %d",error);
-		log_creator(LOG_ERROR,msg);
-		bzero(msg,STR_SIZE);
-	}
+	temperature_thread();
+	light_thread();
 	heartbeat();
 }
 
@@ -239,6 +333,22 @@ int32_t timer_init(void)
 	error=timer_settime(timerid, 0, &timer_data, NULL);
 }
 
+void kill_logger(int sig)
+{
+	log_creator(LOG_ERROR,"USR1 Kill logger command received");
+	printf("USR1 Kill logger command received\n");
+	pthread_cancel(thread_logger);
+	logger_condition=0;
+}
+
+void kill_server(int sig)
+{
+	log_creator(LOG_ERROR,"USR2 Kill server command received");	
+	printf("USR2 Kill server command received\n");
+	pthread_cancel(thread_server);
+	server_condition=0;
+}
+
 /**********************************
 * system init
 * To initialize the shared memory
@@ -247,6 +357,8 @@ int32_t timer_init(void)
 int32_t system_init(void)
 {
 	int32_t error=0;
+	logger_condition=1;
+	server_condition=1;
 	condition=1;
 	ptr=NULL;
 	printf("System Init\n");
@@ -265,8 +377,8 @@ int32_t system_init(void)
 	temperature_init();
 	light_init();
 	//Signal Handling
-	//signal(SIGUSR1,kill_first_thread);
-	//signal(SIGUSR2,break_condition);
+	signal(SIGUSR1,kill_logger);
+	signal(SIGUSR2,kill_server);
 	signal(SIGINT,system_end);
 	error=timer_init();
 }
@@ -274,6 +386,8 @@ int32_t system_init(void)
 int32_t main(int32_t argc, uint8_t **argv)
 {
 	int32_t error=0;
+	pid_t process_id = getpid();	
+	printf("Process ID = %d\n",process_id);
 	msg=(uint8_t*)malloc(STR_SIZE);
 	ptr=&error;
 	if(argc<2)
@@ -283,40 +397,10 @@ int32_t main(int32_t argc, uint8_t **argv)
 	}
 	logfile=argv[1];		
 	error=system_init();	
-	//pthread creation logger
-	error = pthread_create(&thread_logger,NULL,logger_run,NULL);
-	if(error)
-	{
-		printf("Error Creating Logger Thread\n");
-		kill(getpid(),SIGINT);
-	}
-	if(!fork())
-	{
-		error=pthread_join(thread_logger,NULL);
-	}
-	if(error)
-	{
-		printf("Error Joining logger Thread %d\n",error);
-		kill(getpid(),SIGINT);
-	}
+	logger_thread();
 	sem_wait(sem_logger_ready);	
 	//error=bist();	
-	//pthread creation server
-	error=pthread_create(&thread_server,NULL,server_run,NULL);   //error checks
-	if(error)
-	{
-		log_creator(LOG_ERROR,"Error Creating Server Thread");
-	}
-	if(!fork())
-	{
-		error=pthread_join(thread_server,NULL);
-	}
-	if(error)
-	{	
-		sprintf(msg,"Error Joining Server Thread %d",error);
-		log_creator(LOG_ERROR,msg);
-		bzero(msg,STR_SIZE);
-	}
+	server_thread();
 	while(condition)
 	{
 	

@@ -1,70 +1,10 @@
-
 /******************************************
 * bist_test.c
 * Author: Sanika Dongre and Monish Nene
-* Date created: 03/30/19
+* Date created: 03/29/19
 *******************************************/
 
-
-/*******************************************
-* Includes
-*******************************************/
-#include "common.h"
-#include <math.h>
-#include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <linux/i2c-dev.h>
-#include <stdint.h>
-#include <time.h>
-
-/*******************************************
-* Macros
-*******************************************/
-#define ID_VALUE (0x50)
-#define ID_REGISTER (0x8A)
-#define ID_VAL (0X07)
-#define LUX_SLAVE_ADDR (0x39)
-#define POWER_ADDR (0x80)
-#define TIMING_REG (0X81)
-#define TIMING_VAL (0X12)
-#define START_COMMAND (0X80)
-#define POWER_ON_CMD (0x3)
-#define CONTROL_VAL(0X09)
-#define TLL (0x82)
-#define TLH (0x83)
-#define THL (0X84)
-#define THH (0X85)
-#define INTERRUPT_REG (0X86)
-#define INTERRUPT_VALUE (0X05)
-#define POWER_OFF_CMD (0x00)
-#define CH0_L (0x8C)
-#define CH0_H (0x8D)
-#define CH1_L (0x8E)
-#define CH1_H (0x8F)
-#define slave_addr     (0x48)
-#define tempregaddr    (00)
-#define inicond        (0xA060)
-#define configregaddr  (0x01)
-#define tlowregaddr    (0x02)
-#define thighregaddr   (0x03)
-#define highmask       (0x00FF)
-
-typedef enum //error or success enum
-{
-	error=0,
-	success=1
-}error_check;
-
-/***************************
-* Global variables
-***************************/
-int val;
-int16_t celcius=0,kelvin=0,fahrenheit=0;
+#include "bist_test.h"
 
 /***********************
 *i2c_file function
@@ -87,7 +27,6 @@ uint8_t i2c_file(int32_t fd)
 /********************
 * Write operation 
 ***********************/
-
 uint8_t i2c_write(int32_t fd,uint8_t regval)
 {
 	if(write(fd, &regval, sizeof(regval))!=sizeof(regval))
@@ -111,54 +50,90 @@ uint8_t i2c_read(int32_t fd,uint8_t* buffer,uint32_t size)
 
 }
 
-/***************************
-* id register test
-* checks if it is reads as 50
-* to identify the sensor
+/*************************
+* command register test
 ****************************/
 
-uint8_t id_reg_test(int32_t fd) //identification register- startup light test
+uint8_t cmdreg_write_test(int32_t fd)
+{
+	uint8_t comm=START_COMMAND; //sending stard command = 80
+	if(write(fd, &comm, 1) < 0)
+	{
+		return error;
+	}
+	return success;
+}
+
+/************************************************
+* identification register test
+* To write and read the identification register
+************************************************/
+
+uint8_t id_reg_test(int32_t fd)
 {
 	uint8_t comm=ID_REGISTER;
 	uint8_t value;
 	int32_t check=0;
 	write(fd,&comm,1);
+	comm=ID_VAL;
+	write(fd,&comm,1);
 	check=read(fd,&value,1);
-	if(value!=50)
+	if(value!=ID_VAL)
 	{
 		return error;
 	}
-	return value;
+	return success;
 }
 
-int main()
+/******************************************
+* timing register test
+* To write and read the timing register
+******************************************/
+
+uint8_t timing_reg_test(int32_t fd)
 {
-	float lux_output;
-	uint8_t op, id_op, op1, readop;
+	uint8_t value;
+	uint8_t check=0;
+	uint8_t comm=TIMING_REG;
+	write(fd,&comm,1);
+	comm=TIMING_VAL;
+	write(fd,&comm,1);
+	check=read(fd,&value,1);
+	if(value!=TIMING_VAL)
+	{
+		return error;
+	}
+	return success;
+}
+
+uint8_t i2c_readword(int32_t fd,uint8_t* buff)
+{
+	if(read(fd, buff, 2)!=2)
+	{
+		return error;
+	}
+	return success;
+
+}
+
+uint16_t register_read(int32_t fd, uint8_t regval)
+{
+	uint8_t* buffer=malloc(sizeof(uint8_t)*2);
+	write(fd,&regval,sizeof(regval));
+	i2c_readword(fd,buffer);
+	return ((uint16_t)buffer[0]<<8|buffer[1]);
+}
+
+int bist_check()
+{
+	uint8_t op,op1,op2,op3,op4,op5;
+	uint16_t op6;
 	int32_t error=0;	
 	int32_t fd;
 	uint8_t powerval=0,sensor_id=0, timer=0, interr=0;
 	//i2c_init
-	op=i2c_file(fd); //i2c file
-	//sensor connection test
-	if(op==1)
-	{
-		printf("The initialization is done and the  light sensor is connected\n");
-	}
-	else
-	{
-		perror("The light sensor is not connected thus I/O error\n");
-	}
-	//identification test
-	id_op=id_reg_test(fd);
-	if(id_op==50)
-	{
-		printf("The identification register matches - BIST Successfull\n");
-	}
-	else
-	{
-		perror(" Identification register isn't correct- BIST test failed\n");
-	}
+	fd=open("/dev/i2c-2", O_RDWR);
+	ioctl(fd, I2C_SLAVE, LUX_SLAVE_ADDR);	
 	//power on	
 	i2c_write(fd,POWER_ADDR);
 	i2c_write(fd,POWER_ON_CMD);
@@ -166,32 +141,39 @@ int main()
 	if(powerval==POWER_ON_CMD)
 	{
 		printf("the value of power is %x\n", powerval);
-		printf("The light sensor is powered up and ready to read data\n");
+		printf("Device powered on - BIST Successful\n");
 	}
 	else
 	{
-		perror("The light sensor has not been powered up\n");
+		printf("The device is not powered on - BIST Unsuccessful\n");
 	}
-	//i2c test
-	op1=i2c_write(fd,TIMING_REG);
-	error=i2c_read(fd,&readop,1);
-	if(readop==81)
+	//test identification reg
+	op3=id_reg_test(fd);
+	if(op3==1)
 	{
+<<<<<<< HEAD
 		printf("The I2C works for light - BIST Successfull\n");
 	}
 	else
 	{
 		perror("The I2C fails for light- BIST is not successfull\n");
-	}
-	//temp sensor
-	op=i2c_file(fd); //i2c file
-	//sensor connection test
-	if(op==1)
-	{
-		printf("The initialization is done and the  temp sensor is connected\n");
+=======
+		printf("test identification register successful - BIST Successful\n");
 	}
 	else
 	{
+		printf("The device identification register failed to configure - BIST Unsuccessful\n");
+>>>>>>> 8c4b43d6cd81bdbbe4f8a5b3a37c53b3c0e8b84b
+	}
+	//test timing reg
+	op4=timing_reg_test(fd);
+	if(op4==1)
+	{
+		printf("test timing register successful - BIST Successful\n");
+	}
+	else
+	{
+<<<<<<< HEAD
 		perror("The temp sensor is not connected thus I/O error\n");
 	}	
 	op1=i2c_write(fd,configregaddr);
@@ -203,6 +185,28 @@ int main()
 	else
 	{
 		perror("The I2C fails for temp - BIST is not successfull\n");
+=======
+		printf("test timing register fails - BIST Unsuccessful\n");
+>>>>>>> 8c4b43d6cd81bdbbe4f8a5b3a37c53b3c0e8b84b
 	}
-	
+	//i2c_init for temp
+	fd=open("/dev/i2c-2", O_RDWR);
+	ioctl(fd, I2C_SLAVE, slave_addr);
+	printf("The temperature sensor is connected and it works properly - BIST Successful\n");	
+	uint8_t conn= configregaddr;
+	write(fd,&conn,1);
+	//conn=6;
+	//write(fd,&conn,1);
+	op6=register_read(fd,configregaddr);
+	if(op6==24736)
+	{
+		printf("The temperature sensor I2C works- BIST successful\n");
+	}
+	else
+	{
+		printf("The temperature sensor I2C doesn't work- BIST unsuccessful\n");
+	}
+	printf("BIST test completed\n");
+	return success;
 }
+

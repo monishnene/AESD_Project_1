@@ -81,7 +81,7 @@ void remote_server(void)
 	}
 	memset((char*)&server_addr,0,sizeof(server_addr));
 	server_addr.sin_family=AF_INET;
-	server_addr.sin_port= htons(PORT_ADDRESS);
+	server_addr.sin_port= htons(server_port);
 	server_addr.sin_addr.s_addr=htonl(INADDR_ANY);
 	serverlen = sizeof(struct sockaddr_in);
 	//socket bind
